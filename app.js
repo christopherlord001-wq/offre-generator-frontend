@@ -1199,6 +1199,24 @@ const payload = {
           }
           const result = await res.json();
 
+              const blob = await res.blob();
+              const url = window.URL.createObjectURL(blob);
+
+              let filename = 'Offer.docx';
+              const dispo = res.headers.get('content-disposition');
+              if (dispo && dispo.includes('filename=')) {
+                filename = dispo.split('filename=')[1].replace(/"/g, '').trim();
+              }
+
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = filename;
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+
+              window.URL.revokeObjectURL(url);
+
 if (!result.ok) {
   throw new Error('Generation failed');
 }
@@ -1332,3 +1350,4 @@ if (result.pdf_ok) {
     }
   });
 })();
+
