@@ -1192,50 +1192,32 @@ const payload = {
             body: JSON.stringify(payload),
           });
 
-          if (!res.ok) {
-            const txt = await res.text();
-            alert((LANG === 'fr' ? 'Erreur génération, ' : 'Generation error, ') + txt);
-            return;
-          }
-          const result = await res.json();
-
-              const blob = await res.blob();
-              const url = window.URL.createObjectURL(blob);
-
-              let filename = 'Offer.docx';
-              const dispo = res.headers.get('content-disposition');
-              if (dispo && dispo.includes('filename=')) {
-                filename = dispo.split('filename=')[1].replace(/"/g, '').trim();
-              }
-
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = filename;
-              document.body.appendChild(a);
-              a.click();
-              a.remove();
-
-              window.URL.revokeObjectURL(url);
-
-if (!result.ok) {
-  throw new Error('Generation failed');
-}
-
-if (result.pdf_ok) {
-  alert(
-    LANG === 'fr'
-      ? `✔ Offre générée avec succès.\n\nFichiers créés dans le dossier "output":\n- ${result.docx_file}\n- ${result.pdf_file}`
-      : `✔ Offer generated successfully.\n\nFiles created in the "output" folder:\n- ${result.docx_file}\n- ${result.pdf_file}`
-  );
-} else {
-  alert(
-    LANG === 'fr'
-      ? `⚠ DOCX créé (${result.docx_file}) mais la conversion PDF a échoué.\nVoir les logs du serveur.`
-      : `⚠ DOCX created (${result.docx_file}) but PDF conversion failed.\nCheck server logs.`
-  );
-}
-
-          
+              if (!res.ok) {
+              const txt = await res.text();
+              alert((LANG === 'fr' ? 'Erreur génération, ' : 'Generation error, ') + txt);
+              return;
+            }
+            
+            // ✅ Le serveur renvoie maintenant un fichier (docx/pdf), pas du JSON
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            
+            // Nom de fichier depuis le header (si présent)
+            let filename = 'Offer.docx';
+            const dispo = res.headers.get('content-disposition');
+            if (dispo && dispo.includes('filename=')) {
+              filename = dispo.split('filename=')[1].replace(/"/g, '').trim();
+            }
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            
+            window.URL.revokeObjectURL(url);
+                      
 
         } catch (e) {
           alert(LANG === 'fr'
@@ -1350,5 +1332,6 @@ if (result.pdf_ok) {
     }
   });
 })();
+
 
 
