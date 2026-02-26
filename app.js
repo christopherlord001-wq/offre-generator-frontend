@@ -1186,7 +1186,7 @@ const payload = {
         offerGenerateBtn.textContent = LANG === 'fr' ? 'Génération en cours...' : 'Generating...';
 
         try {
-          const res = await fetch('https://laboratory-children-relaxation-stripes.trycloudflare.com/generate', {
+          const res = await fetch('https://nine-legend-suspected-dicke.trycloudflare.com/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
@@ -1350,4 +1350,5 @@ if (result.pdf_ok) {
     }
   });
 })();
+
 
