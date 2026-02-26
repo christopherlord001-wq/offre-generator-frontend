@@ -1,0 +1,122 @@
+
+
+<!DOCTYPE html>
+
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calculateur eZsign</title>
+
+  <!-- Link to the stylesheet (same folder) -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="appbar">
+    <img src="./logo-ezsign.png" alt="eZsign" onerror="this.style.display='none'">
+    <div id="title" class="app-title">Calculateur eZsign</div>
+
+    <button id="infoBtn" class="icon-btn" title="Tarifs">i</button>
+    <button id="compareBtn" class="chip">Comparer</button>
+
+    <!-- NEW, Offer of service -->
+    <button id="offerBtn" class="chip">Offre de service</button>
+
+    <button id="themeBtn" class="chip">Thème clair</button>
+    <button id="langBtn" class="lang-btn">EN</button>
+  </div>
+
+  <main class="container">
+    <div class="inline-toolbar">
+      <button id="inlineCompareBtn" class="chip btn-ghost">
+        + Comparer (ajouter une colonne)
+      </button>
+    </div>
+
+    <div id="lanes" class="lanes"></div>
+  </main>
+
+  <!-- Pricing modal -->
+  <div id="pricingModal" class="modal" aria-hidden="true">
+    <div class="backdrop" data-close></div>
+    <div class="dialog" role="dialog" aria-modal="true">
+      <div class="head">
+        <h3 id="pricingTitle">Tarifs</h3>
+        <button class="close-x" data-close>&times;</button>
+      </div>
+      <div id="pricingBody" class="body"></div>
+    </div>
+  </div>
+
+  <!-- Compare modal -->
+  <div id="compareModal" class="modal" aria-hidden="true">
+    <div class="backdrop" data-close></div>
+    <div class="dialog" role="dialog" aria-modal="true">
+      <div class="head">
+        <h3 id="compareTitle">Comparer les forfaits</h3>
+        <button class="close-x" data-close>&times;</button>
+      </div>
+      <div id="compareBody" class="body"></div>
+    </div>
+  </div>
+
+  <!-- NEW, Offer modal -->
+  <div id="offerModal" class="modal" aria-hidden="true">
+    <div class="backdrop" data-close></div>
+    <div class="dialog" role="dialog" aria-modal="true">
+      <div class="head">
+        <h3 id="offerTitle">Offre de service</h3>
+        <button class="close-x" data-close>&times;</button>
+      </div>
+
+      <div class="field">
+  <label for="offerCompanyName">Nom de la compagnie</label>
+
+  <div class="companyRow">
+    <input id="offerCompanyName" type="text" placeholder="Ex, MRC de L’Érable" autocomplete="organization" />
+
+    <div class="langToggle" role="radiogroup" aria-label="Langue de l’offre">
+      <button type="button" class="langOpt isActive" data-offer-lang="fr" aria-checked="true">FR</button>
+      <button type="button" class="langOpt" data-offer-lang="en" aria-checked="false">EN</button>
+    </div>
+  </div>
+</div>
+
+
+        <div class="controls offer-controls">
+          <div class="field">
+            <label for="offerPlan">Type de compte</label>
+            <select id="offerPlan">
+              <option value="enterprise">Entreprise</option>
+              <option value="basic">Business Basic</option>
+              <option value="pro">Business Pro</option>
+            </select>
+          </div>
+
+          <div class="field" id="offerFilesField">
+            <label for="offerFiles">Nombre d’API</label>
+            <input id="offerFiles" type="number" min="0" inputmode="numeric" placeholder="Ex, 350" value="0" />
+          </div>
+
+          <div class="field">
+            <label for="offerUsers">Nombre d’utilisateurs</label>
+            <input id="offerUsers" type="number" min="1" inputmode="numeric" placeholder="Ex, 11" value="10" />
+          </div>
+
+          <button id="offerGenerateBtn" class="btn">Générer Word + PDF</button>
+        </div>
+
+        <div class="note" id="offerDatesNote"></div>
+
+        <div class="field" style="margin-top:12px">
+          <label for="offerPreview">Aperçu, section SIMULATION</label>
+          <textarea id="offerPreview" rows="10" readonly></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
+
