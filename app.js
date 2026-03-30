@@ -837,7 +837,7 @@ const displayedUserRate = (u < acct.includesUsers) ? 0 : userCostBreakdown(acct.
   lines.push(
     OFFER_LANG === 'fr'
 
-      ? `Les utilisateurs supplémentaires sont facturés au coût de ${moneyPlainLocal(bU.rate)}} chacun.`
+      ? `Les utilisateurs supplémentaires sont facturés au coût de ${moneyPlainLocal(bU.rate)} chacun.`
       : `Additional users are billed at ${moneyPlainLocal(bU.rate)}} each.`
   );
 
