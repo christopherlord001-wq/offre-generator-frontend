@@ -832,14 +832,16 @@ const moneyPlainLocal = n => moneyPlainOffer(n);
       : `The base cost of ${moneyPlainLocal(baseTierPrice)} includes ${fmtNumber(includedAtTier)} user${includedAtTier > 1 ? 's' : ''}.`
   );
 
-const displayedUserRate = (u < acct.includesUsers) ? 0 : userCostBreakdown(acct.includesUsers + 1, acct).rate;
-
-  lines.push(
-    OFFER_LANG === 'fr'
-
-      ? `Les utilisateurs supplémentaires sont facturés au coût de ${moneyPlainLocal(bU.rate)} chacun.`
-      : `Additional users are billed at ${moneyPlainLocal(bU.rate)}} each.`
-  );
+const displayedUserRate =
+  u <= acct.includesUsers
+    ? userCostBreakdown(acct.includesUsers + 1, acct).rate
+    : bU.rate;
+   
+lines.push(
+  OFFER_LANG === 'fr'
+    ? `Les utilisateurs supplémentaires sont facturés au coût de ${moneyPlainLocal(displayedUserRate)} chacun.`
+    : `Additional users are billed at ${moneyPlainLocal(displayedUserRate)} each.`
+);
 
   // Detailed user calc
   lines.push('');
