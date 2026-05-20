@@ -1188,7 +1188,7 @@ const payload = {
         offerGenerateBtn.textContent = LANG === 'fr' ? 'Génération en cours...' : 'Generating...';
 
         try {
-          const res = await fetch('https://ferrari-appreciation-haven-rip.trycloudflare.com/generate', {
+          const res = await fetch('https://interracial-garbage-classes-feb.trycloudflare.com/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
