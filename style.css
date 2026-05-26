@@ -101,13 +101,14 @@ html[data-theme="dark"] .field select{background:#0b1220;color:#E5E7EB}
 }
 
 /* NEW, text input and textarea */
-.field input[type=text], .field textarea{
+.field input[type=text], .field input[type=email], .field textarea{
   width:100%;padding:10px 12px;font-size:16px;border:1px solid var(--brand-border);
   border-radius:10px;background:#fff;color:#222;transition:border-color .15s,box-shadow .15s
 }
 html[data-theme="dark"] .field input[type=text],
+html[data-theme="dark"] .field input[type=email],
 html[data-theme="dark"] .field textarea{background:#0b1220;color:#E5E7EB}
-.field input[type=text]:focus, .field textarea:focus{
+.field input[type=text]:focus, .field input[type=email]:focus, .field textarea:focus{
   border-color:var(--brand-primary);box-shadow:0 0 0 3px rgba(230,57,70,.15);outline:none
 }
 .field textarea{
@@ -121,13 +122,14 @@ html[data-theme="dark"] .field textarea{background:#0b1220;color:#E5E7EB}
 .btn:hover{background:var(--brand-primary-600)}
 
 /* Offer modal layout, keep same style */
-.offer-controls{grid-template-columns:1fr 1fr 1fr auto}
+.offer-controls{grid-template-columns:1fr 1fr 1fr}
+.offer-other-fields{grid-template-columns:1fr 1fr}
 @media (max-width:1100px){
   .offer-controls{grid-template-columns:1fr 1fr}
   .offer-controls .btn{grid-column:1/-1}
 }
 @media (max-width:640px){
-  .offer-controls{grid-template-columns:1fr}
+  .offer-controls,.offer-other-fields{grid-template-columns:1fr}
 }
 
 /* ==========================================================================
@@ -187,6 +189,9 @@ html[data-theme="dark"] .field textarea{background:#0b1220;color:#E5E7EB}
   gap:10px;
   align-items:center;
 }
+@media (max-width:640px){
+  .companyRow{align-items:stretch;flex-direction:column}
+}
 
 .langToggle{
   display:inline-flex;
@@ -212,4 +217,133 @@ html[data-theme="dark"] .field textarea{background:#0b1220;color:#E5E7EB}
 .langOpt.isActive{
   background:var(--brand-primary);
   color:#fff;
+}
+
+.offer-simulations{display:grid;gap:12px;margin-top:14px}
+.offer-simulation{
+  border:1px solid var(--brand-border);
+  border-radius:10px;
+  padding:12px;
+  background:var(--output-bg);
+}
+.offer-sim-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  color:var(--brand-primary);
+}
+.offer-sim-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.feature-btn{
+  padding:5px 9px;
+  font-size:12px;
+}
+.offer-unlimited-users{
+  margin-top:0;
+  align-self:end;
+}
+.link-btn{
+  border:0;
+  background:transparent;
+  color:var(--brand-primary);
+  cursor:pointer;
+  font-weight:700;
+  padding:4px 0;
+}
+.offer-actions{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:14px;
+}
+.output-options{
+  display:flex;
+  gap:18px;
+  flex-wrap:wrap;
+  align-items:center;
+  margin-top:12px;
+  padding:10px 12px;
+  border:1px solid var(--brand-border);
+  border-radius:10px;
+  background:var(--output-bg);
+}
+.offer-actions .btn{margin-left:auto}
+@media (max-width:640px){
+  .offer-actions{display:grid}
+  .offer-actions .btn{margin-left:0}
+}
+
+.feature-modal .dialog{
+  width:min(760px,94vw);
+}
+.feature-modal .muted{
+  margin-top:0;
+}
+.feature-checklist{
+  display:grid;
+  gap:12px;
+}
+.feature-group{
+  border:1px solid var(--brand-border);
+  border-radius:10px;
+  padding:10px;
+  background:var(--output-bg);
+}
+.feature-group-title{
+  margin:0 0 8px;
+  font-weight:800;
+  color:var(--brand-primary);
+  font-size:14px;
+}
+.feature-options{
+  display:grid;
+  gap:7px;
+}
+.feature-option{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  line-height:1.35;
+  color:var(--ink);
+  font-size:14px;
+}
+.feature-option input{
+  margin-top:2px;
+  accent-color:var(--brand-primary);
+}
+.feature-other{
+  margin-top:12px;
+  display:grid;
+  gap:8px;
+}
+.feature-other textarea{
+  width:100%;
+  padding:10px 12px;
+  font-size:15px;
+  border:1px solid var(--brand-border);
+  border-radius:10px;
+  background:#fff;
+  color:#222;
+  resize:vertical;
+}
+html[data-theme="dark"] .feature-other textarea{
+  background:#0b1220;
+  color:#E5E7EB;
+}
+.feature-modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  margin-top:14px;
+  flex-wrap:wrap;
+}
+@media (max-width:640px){
+  .offer-sim-head{align-items:flex-start}
+  .feature-modal-actions{display:grid}
 }

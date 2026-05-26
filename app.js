@@ -70,6 +70,27 @@
           [Infinity, 11.48],
         ],
       },
+
+      perFolder: {
+        key: 'perFolder',
+        name_fr: 'Entreprise par envois',
+        name_en: 'Enterprise per-sent',
+        base: 222.80,
+        includesFiles: 0,
+        includesUsers: 10,
+        apiAvailable: false,
+        filePricing: 'perSent',
+        unlimitedUsers: true,
+        userSegments: [
+          [20, 21.27],
+          [50, 20.16],
+          [100, 19.05],
+          [250, 18.05],
+          [500, 17.09],
+          [1000, 16.21],
+          [Infinity, 15.31],
+        ],
+      },
     };
 
     // API tiers (Enterprise)
@@ -86,6 +107,20 @@
       [25100, 24275.50, 0.89],
       [50100, 45525.50, 0.85],
       [Infinity, 45525.50, 0.80],
+    ];
+
+    // Enterprise per-sent tiers
+    // [upperLimit, sendsIncludedAtTierStart, monthlyPriceAtTierStart, pricePerAdditionalSend]
+    const FOLDER_TIERS = [
+      [100, 0, 0.00, 2.00],
+      [500, 100, 200.00, 1.85],
+      [1000, 500, 940.00, 1.73],
+      [2500, 1000, 1805.00, 1.63],
+      [5000, 2500, 4250.00, 1.55],
+      [10000, 5000, 8125.00, 1.50],
+      [25000, 10000, 15625.00, 1.45],
+      [50000, 25000, 37375.00, 1.25],
+      [Infinity, 50000, 68625.00, 1.15],
     ];
 
     /* =============================================================================
@@ -135,6 +170,7 @@
         month: 'Calcul des frais mensuels',
         entRow: (n, b, iu, if_) => `Forfait ${n} = ${fmtMoney(b)}/mois (inclut ${iu} utilisateur${iu > 1 ? 's' : ''}${if_ > 0 ? ` et ${if_} dossiers` : ''})`,
         apiRow: (pb, c, r) => `Frais API = ${fmtMoney(pb)} + ${c} × ${fmtMoney(r)} = ${fmtMoney(pb + c * r)}`,
+        folderRow: (pb, c, r) => `Frais dossiers = ${fmtMoney(pb)} + ${c} × ${fmtMoney(r)} = ${fmtMoney(pb + c * r)}`,
         usersNone: inc => `Comme ${inc} utilisateur${inc > 1 ? 's' : ''} sont inclus, aucun frais utilisateurs.`,
         usersMust: x => `Vous avez des frais pour ${x} ${x === 1 ? 'utilisateur supplémentaire' : 'utilisateurs supplémentaires'}.`,
         usersTier: (u, monthlyAtPrev, c, r, pl, lim) => `Utilisateurs, palier ${pl + 1}–${lim}. Base palier, ${fmtMoney(monthlyAtPrev)}, ${c} restants (${u}-${pl}) à ${fmtMoney(r)}/utilisateur, total, ${fmtMoney(monthlyAtPrev + c * r)}.`,
@@ -149,9 +185,48 @@
         thBase: 'Base',
         thUsers: 'Utilisateurs',
         thUserFees: 'Frais utilisateurs',
-        thApiFees: 'Frais API',
+        thApiFees: 'Frais envois/API',
         thTotal: 'Total',
         andUp: 'et plus',
+        offerTop: 'Offre de service',
+        offerTitle: 'Offre de service',
+        companyName: 'Nom de la compagnie',
+        companyPlaceholder: 'Ex, MRC de L’Érable',
+        offerLanguage: 'Langue de l’offre',
+        proposalCreator: 'Créée par',
+        proposalCreatorOther: 'Autre',
+        creatorName: 'Nom',
+        creatorEmail: 'Courriel',
+        simulation: 'Simulation',
+        addSimulation: '+ Ajouter une simulation',
+        maxSimulations: 'Maximum 3 simulations',
+        removeSimulation: 'Retirer',
+        accountByFolder: 'Entreprise par envois',
+        folderCount: 'Nombre d’envois',
+        apiCount: 'Nombre de dossiers API',
+        generateOffer: 'Générer Word + PDF',
+        generateWordOnly: 'Générer Word',
+        generatePdfOnly: 'Générer PDF',
+        generateWordPdf: 'Générer Word + PDF',
+        generatingOffer: 'Génération en cours...',
+        offerPreview: 'Aperçu, section SIMULATION',
+        enterCompany: 'Entre le nom de la compagnie.',
+        enterCreator: 'Entre le nom et le courriel de la personne qui prépare l’offre.',
+        generationError: 'Erreur génération, ',
+        generationServerError: 'Impossible de joindre le serveur Python. Vérifie que server.py est lancé sur 127.0.0.1:5055.',
+        folderFees: 'Frais envois',
+        unlimitedUsers: 'Utilisateurs illimités',
+        sentRow: (pb, c, r) => `Frais d’envois = ${fmtMoney(pb)} + ${c} × ${fmtMoney(r)} = ${fmtMoney(pb + c * r)}`,
+        featureButton: 'Comme discuté',
+        featureTitle: 'Fonctionnalités discutées',
+        featureIntro: 'Coche les fonctionnalités et rappels à inclure dans la section « Comme discuté » de cette simulation.',
+        featureOther: 'Autre élément',
+        featureOtherPlaceholder: 'Écris un élément à ajouter à la section « Comme discuté ».',
+        featureApply: 'Appliquer',
+        featureDefaults: 'Suggestions par défaut',
+        outputWord: 'Document Word',
+        outputPdf: 'PDF',
+        chooseOutput: 'Choisis au moins un format à générer.',
       },
 
       en: {
@@ -183,6 +258,7 @@
         month: 'Monthly fees calculation',
         entRow: (n, b, iu, if_) => `${n} plan = ${fmtMoney(b)}/month (includes ${iu} user${iu > 1 ? 's' : ''}${if_ > 0 ? ` and ${if_} files` : ''})`,
         apiRow: (pb, c, r) => `API fees = ${fmtMoney(pb)} + ${c} × ${fmtMoney(r)} = ${fmtMoney(pb + c * r)}`,
+        folderRow: (pb, c, r) => `Folder fees = ${fmtMoney(pb)} + ${c} × ${fmtMoney(r)} = ${fmtMoney(pb + c * r)}`,
         usersNone: inc => `Since ${inc} user${inc > 1 ? 's' : ''} are included, there are no user fees.`,
         usersMust: x => `You have fees for ${x} additional ${x === 1 ? 'user' : 'users'}.`,
         usersTier: (u, monthlyAtPrev, c, r, pl, lim) => `Users, tier ${pl + 1}–${lim}. Base tier, ${fmtMoney(monthlyAtPrev)}, ${c} remaining (${u}-${pl}) at ${fmtMoney(r)}/user, total, ${fmtMoney(monthlyAtPrev + c * r)}.`,
@@ -197,9 +273,48 @@
         thBase: 'Base',
         thUsers: 'Users',
         thUserFees: 'User fees',
-        thApiFees: 'API fees',
+        thApiFees: 'Send/API fees',
         thTotal: 'Total',
         andUp: 'and up',
+        offerTop: 'Service offer',
+        offerTitle: 'Service offer',
+        companyName: 'Company name',
+        companyPlaceholder: 'e.g., MRC de L’Érable',
+        offerLanguage: 'Offer language',
+        proposalCreator: 'Created by',
+        proposalCreatorOther: 'Other',
+        creatorName: 'Name',
+        creatorEmail: 'Email',
+        simulation: 'Simulation',
+        addSimulation: '+ Add a simulation',
+        maxSimulations: 'Maximum 3 simulations',
+        removeSimulation: 'Remove',
+        accountByFolder: 'Enterprise per-sent',
+        folderCount: 'Number of sends',
+        apiCount: 'Number of API folders',
+        generateOffer: 'Generate Word + PDF',
+        generateWordOnly: 'Generate Word',
+        generatePdfOnly: 'Generate PDF',
+        generateWordPdf: 'Generate Word + PDF',
+        generatingOffer: 'Generating...',
+        offerPreview: 'Preview, SIMULATION section',
+        enterCompany: 'Enter the company name.',
+        enterCreator: 'Enter the name and email of the person preparing the offer.',
+        generationError: 'Generation error, ',
+        generationServerError: 'Cannot reach the Python server. Make sure server.py is running on 127.0.0.1:5055.',
+        folderFees: 'Send fees',
+        unlimitedUsers: 'Unlimited users',
+        sentRow: (pb, c, r) => `Send fees = ${fmtMoney(pb)} + ${c} × ${fmtMoney(r)} = ${fmtMoney(pb + c * r)}`,
+        featureButton: 'As discussed',
+        featureTitle: 'Discussed features',
+        featureIntro: 'Select the features and reminders to include in the “As discussed” section for this simulation.',
+        featureOther: 'Other item',
+        featureOtherPlaceholder: 'Write an item to add to the “As discussed” section.',
+        featureApply: 'Apply',
+        featureDefaults: 'Default suggestions',
+        outputWord: 'Word document',
+        outputPdf: 'PDF',
+        chooseOutput: 'Choose at least one format to generate.',
       },
     };
 
@@ -231,7 +346,41 @@
       return { files, prevLimit: 0, prevBase: 0, inTierCount: 0, rate: 0, apiTotal: 0 };
     }
 
+    function folderCostBreakdown(files) {
+      files = Math.max(0, Math.floor(Number(files) || 0));
+      if (files <= 0) {
+        return { files, prevLimit: 0, prevBase: 0, inTierCount: 0, rate: 2.00, apiTotal: 0 };
+      }
+
+      for (const [limit, included, base, rate] of FOLDER_TIERS) {
+        if (files <= limit) {
+          const inTierCount = files - included;
+          const apiTotal = base + inTierCount * rate;
+          return { files, prevLimit: included, prevBase: base, inTierCount, rate, apiTotal };
+        }
+      }
+
+      return { files, prevLimit: 0, prevBase: 0, inTierCount: 0, rate: 0, apiTotal: 0 };
+    }
+
+    function hasFilePricing(account) {
+      return account.apiAvailable || account.filePricing === 'perSent';
+    }
+
+    function fileCostBreakdown(files, account) {
+      if (account.filePricing === 'perSent') return folderCostBreakdown(files);
+      return apiCostBreakdown(files, account);
+    }
+
+    function hasUserPricing(account) {
+      return !account.unlimitedUsers;
+    }
+
     function userCostBreakdown(users, account) {
+      if (account.unlimitedUsers) {
+        return { users: 0, prevLimit: 0, prevBase: 0, inTierCount: 0, rate: 0, userTotal: 0 };
+      }
+
       users = Math.max(0, Math.floor(Number(users) || 0));
       const inc = account.includesUsers;
 
@@ -262,6 +411,13 @@
       return '∞';
     }
 
+    function findFolderTierLimit(files) {
+      for (const [limit] of FOLDER_TIERS) {
+        if (files <= limit) return limit === Infinity ? '∞' : limit;
+      }
+      return '∞';
+    }
+
     function findUserTierLimit(users, acct) {
       for (const [limit] of acct.userSegments) {
         if (users <= limit) return limit === Infinity ? '∞' : limit;
@@ -273,11 +429,11 @@
        4) buildSimulationHTML
        ============================================================================= */
     function buildSimulationHTML(files, users, acct) {
-      const bF = apiCostBreakdown(files, acct);
+      const bF = fileCostBreakdown(files, acct);
       const bU = userCostBreakdown(users, acct);
 
-      const paidFiles = Math.max(0, acct.apiAvailable ? (files - acct.includesFiles) : 0);
-      const paidUsers = Math.max(0, users - acct.includesUsers);
+      const paidFiles = Math.max(0, hasFilePricing(acct) ? (files - acct.includesFiles) : 0);
+      const paidUsers = hasUserPricing(acct) ? Math.max(0, users - acct.includesUsers) : 0;
 
       const total = acct.base + bF.apiTotal + bU.userTotal;
       const monthlyAtPrevLimit = acct.base + bU.prevBase;
@@ -286,26 +442,41 @@
       const parts = [];
 
       parts.push(`<b>${t[LANG].sim}</b>`);
-      parts.push(t[LANG].line2(name, acct.base, acct.includesUsers, acct.includesFiles));
+      if (acct.unlimitedUsers) {
+        parts.push(LANG === 'fr'
+          ? `Le forfait <b>${name}</b> comprend des <b>utilisateurs illimités</b>. Les envois manuels et API sont facturés selon l’utilisation mensuelle.`
+          : `The <b>${name}</b> plan includes <b>unlimited users</b>. Manual and API sends are billed according to monthly usage.`);
+      } else {
+        parts.push(t[LANG].line2(name, acct.base, acct.includesUsers, acct.includesFiles));
+      }
 
-      if (acct.apiAvailable && files > 0) {
+      if (hasFilePricing(acct) && files > 0) {
         if (paidFiles === 0) parts.push(t[LANG].noneFiles(acct.includesFiles));
         else {
           parts.push(t[LANG].mustPayFiles(paidFiles, acct.includesFiles));
-          parts.push(t[LANG].tierFiles(files, bF.prevBase, bF.inTierCount, bF.rate, bF.prevLimit, findApiTierLimit(files)));
+          const limit = acct.filePricing === 'perSent' ? findFolderTierLimit(files) : findApiTierLimit(files);
+          parts.push(t[LANG].tierFiles(files, bF.prevBase, bF.inTierCount, bF.rate, bF.prevLimit, limit));
         }
       }
 
-      if (paidUsers === 0) parts.push(t[LANG].usersNone(acct.includesUsers));
-      else {
+      if (hasUserPricing(acct) && paidUsers === 0) parts.push(t[LANG].usersNone(acct.includesUsers));
+      else if (hasUserPricing(acct)) {
         parts.push(t[LANG].usersMust(paidUsers));
         parts.push(t[LANG].usersTier(users, monthlyAtPrevLimit, bU.inTierCount, bU.rate, bU.prevLimit, findUserTierLimit(users, acct)));
       }
 
       parts.push(`<b>${t[LANG].month}</b>`);
-      parts.push(t[LANG].entRow(name, acct.base, acct.includesUsers, acct.includesFiles));
-      if (acct.apiAvailable) parts.push(t[LANG].apiRow(bF.prevBase, bF.inTierCount, bF.rate));
-      parts.push(t[LANG].usersRow(monthlyAtPrevLimit, bU.inTierCount, bU.rate));
+      if (acct.unlimitedUsers) {
+        parts.push(LANG === 'fr'
+          ? `Forfait ${name} = ${fmtMoney(acct.base)}/mois (utilisateurs illimités)`
+          : `${name} plan = ${fmtMoney(acct.base)}/month (unlimited users)`);
+      } else {
+        parts.push(t[LANG].entRow(name, acct.base, acct.includesUsers, acct.includesFiles));
+      }
+      if (hasFilePricing(acct)) {
+        parts.push((acct.filePricing === 'perSent' ? t[LANG].sentRow : t[LANG].apiRow)(bF.prevBase, bF.inTierCount, bF.rate));
+      }
+      if (hasUserPricing(acct)) parts.push(t[LANG].usersRow(monthlyAtPrevLimit, bU.inTierCount, bU.rate));
       parts.push(`<b>${t[LANG].total}${fmtMoney(total)}</b>`);
 
       return {
@@ -343,13 +514,33 @@
     const offerModal = document.getElementById('offerModal');
     const offerTitle = document.getElementById('offerTitle');
     const offerCompanyName = document.getElementById('offerCompanyName');
-    const offerPlan = document.getElementById('offerPlan');
-    const offerFilesField = document.getElementById('offerFilesField');
-    const offerFiles = document.getElementById('offerFiles');
-    const offerUsers = document.getElementById('offerUsers');
+    const offerCompanyLabel = document.getElementById('offerCompanyLabel');
+    const offerSigner = document.getElementById('offerSigner');
+    const offerSignerLabel = document.getElementById('offerSignerLabel');
+    const offerSignerOtherFields = document.getElementById('offerSignerOtherFields');
+    const offerSignerName = document.getElementById('offerSignerName');
+    const offerSignerNameLabel = document.getElementById('offerSignerNameLabel');
+    const offerSignerEmail = document.getElementById('offerSignerEmail');
+    const offerSignerEmailLabel = document.getElementById('offerSignerEmailLabel');
+    const offerSimulations = document.getElementById('offerSimulations');
+    const addSimulationBtn = document.getElementById('addSimulationBtn');
     const offerGenerateBtn = document.getElementById('offerGenerateBtn');
     const offerPreview = document.getElementById('offerPreview');
+    const offerPreviewLabel = document.getElementById('offerPreviewLabel');
     const offerDatesNote = document.getElementById('offerDatesNote');
+    const outputWordCheck = document.getElementById('outputWordCheck');
+    const outputPdfCheck = document.getElementById('outputPdfCheck');
+    const outputWordLabel = document.getElementById('outputWordLabel');
+    const outputPdfLabel = document.getElementById('outputPdfLabel');
+    const featureModal = document.getElementById('featureModal');
+    const featureModalTitle = document.getElementById('featureModalTitle');
+    const featureModalIntro = document.getElementById('featureModalIntro');
+    const featureChecklist = document.getElementById('featureChecklist');
+    const featureOtherCheck = document.getElementById('featureOtherCheck');
+    const featureOtherText = document.getElementById('featureOtherText');
+    const featureOtherLabel = document.getElementById('featureOtherLabel');
+    const featureDefaultsBtn = document.getElementById('featureDefaultsBtn');
+    const featureSaveBtn = document.getElementById('featureSaveBtn');
 
     /* =============================================================================
        6) INLINE LANES UI
@@ -368,7 +559,8 @@
       return `
         <option value="enterprise"${sel === 'enterprise' ? ' selected' : ''}>${LANG === 'fr' ? 'Entreprise' : 'Enterprise'}</option>
         <option value="basic"${sel === 'basic' ? ' selected' : ''}>Business Basic</option>
-        <option value="pro"${sel === 'pro' ? ' selected' : ''}>Business Pro</option>`;
+        <option value="pro"${sel === 'pro' ? ' selected' : ''}>Business Pro</option>
+        <option value="perFolder"${sel === 'perFolder' ? ' selected' : ''}>${t[LANG].accountByFolder}</option>`;
     }
 
     function makeLane(i, defaults) {
@@ -389,7 +581,7 @@
               <input type="number" id="${laneId(i, 'files')}" placeholder="${LANG === 'fr' ? 'Ex, 350' : 'e.g., 350'}" min="0" inputmode="numeric" value="${defaults.files ?? ''}">
             </div>
 
-            <div class="field">
+            <div class="field" id="${laneId(i, 'usersField')}">
               <label for="${laneId(i, 'users')}">${t[LANG].users}</label>
               <input type="number" id="${laneId(i, 'users')}" placeholder="${LANG === 'fr' ? 'Ex, 75' : 'e.g., 75'}" min="1" inputmode="numeric" value="${defaults.users ?? 10}">
             </div>
@@ -443,9 +635,15 @@
     function updatePlanUI(i) {
       const sel = id => document.getElementById(laneId(i, id));
       const a = ACCOUNTS[sel('plan').value];
-      sel('filesField').style.display = a.apiAvailable ? '' : 'none';
-      sel('kpiBlockFiles').style.display = a.apiAvailable ? '' : 'none';
-      sel('kpiBlockApi').style.display = a.apiAvailable ? '' : 'none';
+      sel('filesField').style.display = hasFilePricing(a) ? '' : 'none';
+      const filesLabel = sel('filesField')?.querySelector('label');
+      if (filesLabel) filesLabel.textContent = a.filePricing === 'perSent' ? t[LANG].folderCount : t[LANG].files;
+      const usersField = sel('usersField');
+      if (usersField) usersField.style.display = hasUserPricing(a) ? '' : 'none';
+      sel('kpiBlockFiles').style.display = hasFilePricing(a) ? '' : 'none';
+      sel('kpiBlockApi').style.display = hasFilePricing(a) ? '' : 'none';
+      const apiLabel = sel('kpiBlockApi')?.querySelector('.label');
+      if (apiLabel) apiLabel.textContent = a.filePricing === 'perSent' ? t[LANG].folderFees : t[LANG].k_api;
     }
 
     function updatePlanUIAll() {
@@ -490,13 +688,13 @@
       const sel = id => document.getElementById(laneId(i, id));
       const a = ACCOUNTS[sel('plan').value];
 
-      const files = a.apiAvailable ? parseInt(sel('files').value || '0', 10) : 0;
-      const users = parseInt(sel('users').value || String(a.includesUsers), 10);
+      const files = hasFilePricing(a) ? parseInt(sel('files').value || '0', 10) : 0;
+      const users = hasUserPricing(a) ? parseInt(sel('users').value || String(a.includesUsers), 10) : 0;
 
       const kpis = document.getElementById(laneId(i, 'kpis'));
       const out = sel('output');
 
-      if (isNaN(users) || users < 1) {
+      if (hasUserPricing(a) && (isNaN(users) || users < 1)) {
         out.textContent = t[LANG].empty;
         kpis.style.display = 'none';
         return;
@@ -506,11 +704,11 @@
       out.innerHTML = res.html;
       kpis.style.display = 'block';
 
-      if (a.apiAvailable) {
+      if (hasFilePricing(a)) {
         document.getElementById(laneId(i, 'kpiFiles')).textContent = fmtNumber(files);
         document.getElementById(laneId(i, 'kpiApi')).textContent = fmtMoney(res.apiTotal);
       }
-      document.getElementById(laneId(i, 'kpiUsers')).textContent = fmtNumber(users);
+      document.getElementById(laneId(i, 'kpiUsers')).textContent = hasUserPricing(a) ? fmtNumber(users) : t[LANG].unlimitedUsers;
       document.getElementById(laneId(i, 'kpiUserFees')).textContent = fmtMoney(res.userExtra);
       document.getElementById(laneId(i, 'kpiTotal')).textContent = fmtMoney(res.totalMonthly);
 
@@ -589,11 +787,49 @@
         </table>`;
     }
 
+    function folderTableHTML() {
+      const rows = FOLDER_TIERS.map(([limit, included, base, rate], index) => {
+        const start = included + 1;
+        const range = limit === Infinity
+          ? `${fmtNumber(start)} ${t[LANG].andUp}`
+          : `${fmtNumber(start)} – ${fmtNumber(limit)}`;
+
+        return `
+          <tr>
+            <td>${range}</td>
+            <td>${fmtNumber(included)}</td>
+            <td>${fmtMoney(base)}</td>
+            <td>${fmtMoney(rate)}</td>
+          </tr>`;
+      }).join('');
+
+      return `
+        <div class="section-title" style="margin:10px 0 6px;font-weight:700;color:var(--ink);">
+          ${LANG === 'fr' ? 'Tarif Entreprise par envois' : 'Enterprise per-sent pricing'}
+        </div>
+        <p class="muted" style="margin:0 0 8px">
+          ${LANG === 'fr'
+            ? 'Pour accéder à ce type de compte, vous devez payer des frais fixes mensuels de 222,80 $, même si aucun envoi n’est complété. Les envois manuels et API sont ensuite facturés selon le tableau ci-dessous.'
+            : 'To access this type of account, you must pay a fixed monthly fee of $222.80, even if no send is completed. Manual and API sends are then billed according to the chart below.'}
+        </p>
+        <table class="price-table">
+          <thead>
+            <tr>
+              <th>${LANG === 'fr' ? 'Envois mensuels' : 'Monthly sends'}</th>
+              <th>${LANG === 'fr' ? 'Nombre d’envois inclus' : 'Number of sends included'}</th>
+              <th>${LANG === 'fr' ? 'Prix mensuel' : 'Monthly price'}</th>
+              <th>${LANG === 'fr' ? 'Prix par envoi supplémentaire' : 'Price per additional send'}</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    }
+
     function renderPricingTables() {
       pricingTitle.textContent = t[LANG].infoTitle;
 
       const visible = getVisiblePlans();
-      const order = ['basic', 'pro', 'enterprise'];
+      const order = ['basic', 'pro', 'enterprise', 'perFolder'];
       let html = '';
 
       if (visible.includes('enterprise')) {
@@ -641,8 +877,12 @@
           </table>`;
       }
 
+      if (visible.includes('perFolder')) {
+        html += folderTableHTML();
+      }
+
       for (const key of order) {
-        if (visible.includes(key)) html += userTableFor(ACCOUNTS[key]);
+        if (visible.includes(key) && key !== 'perFolder') html += userTableFor(ACCOUNTS[key]);
       }
 
       html += `
@@ -667,11 +907,11 @@
       const rows = [];
       const results = [];
 
-      for (const key of ['basic', 'pro', 'enterprise']) {
+      for (const key of ['basic', 'pro', 'enterprise', 'perFolder']) {
         const p = ACCOUNTS[key];
-        const F = p.apiAvailable ? files : 0;
+        const F = hasFilePricing(p) ? files : 0;
         const U = users;
-        const bF = apiCostBreakdown(F, p);
+        const bF = fileCostBreakdown(F, p);
         const bU = userCostBreakdown(U, p);
         const total = p.base + bF.apiTotal + bU.userTotal;
 
@@ -683,7 +923,7 @@
             <td>${fmtMoney(p.base)}</td>
             <td>${fmtNumber(U)}</td>
             <td>${fmtMoney(bU.userTotal)}</td>
-            <td>${p.apiAvailable ? fmtMoney(bF.apiTotal) : '—'}</td>
+            <td>${hasFilePricing(p) ? fmtMoney(bF.apiTotal) : '—'}</td>
             <td data-t="${total}">${fmtMoney(total)}</td>
           </tr>`);
       }
@@ -741,6 +981,10 @@
   return (OFFER_LANG === 'fr' ? s.replace('.', ',') : s) + ' $';
 }
 
+    function fmtNumberOfferPlain(n) {
+      return new Intl.NumberFormat(OFFER_LANG === 'fr' ? 'fr-CA' : 'en-CA').format(n);
+    }
+
 
     function addMonthsSafe(date, months) {
       const d = new Date(date);
@@ -768,283 +1012,759 @@
       return (LANG === 'fr' ? s.replace('.', ',') : s) + ' $';
     }
 
-function buildOfferSimulationBlock(planKey, files, users) {
+function buildOfferSimulationBlock(planKey, files, users, simulationNumber, totalSimulations) {
   const acct = ACCOUNTS[planKey];
-const planName = (OFFER_LANG === 'fr' ? acct.name_fr : acct.name_en);
+  const planName = (OFFER_LANG === 'fr' ? acct.name_fr : acct.name_en);
+  const isPerSentPlan = acct.filePricing === 'perSent';
+  const moneyPlainLocal = n => moneyPlainOffer(n);
+  const fmtNumberLocal = n => fmtNumberOfferPlain(n);
 
-  const f = acct.apiAvailable ? Math.max(0, Math.floor(Number(files) || 0)) : 0;
-  const u = Math.max(1, Math.floor(Number(users) || acct.includesUsers));
-
-  const bF = apiCostBreakdown(f, acct);
+  const f = hasFilePricing(acct) ? Math.max(0, Math.floor(Number(files) || 0)) : 0;
+  const u = hasUserPricing(acct) ? Math.max(1, Math.floor(Number(users) || acct.includesUsers)) : 0;
+  const bF = fileCostBreakdown(f, acct);
   const bU = userCostBreakdown(u, acct);
-
-  // ✅ Correct tier base + included users for the ACTIVE tier
-  const includedAtTier = bU.prevLimit;                 // ex: 20 for 21–50
-  const baseTierPrice = acct.base + bU.prevBase;       // ex: 326.40 for 21–50
-
-  const extraUsersAtTier = Math.max(0, u - includedAtTier);
-
   const totalMonthly = acct.base + bF.apiTotal + bU.userTotal;
-
-  const userTierMin = (bU.prevLimit + 1);
-  const userTierMax = findUserTierLimit(u, acct);
-
-  const introRange =
-    u <= acct.includesUsers
-      ? (OFFER_LANG === 'fr'
-
-          ? `1 à ${fmtNumber(acct.includesUsers)} utilisateurs`
-          : `1 to ${fmtNumber(acct.includesUsers)} users`)
-      : (OFFER_LANG === 'fr'
-
-          ? `${fmtNumber(userTierMin)} à ${String(userTierMax)} utilisateurs`
-          : `${fmtNumber(userTierMin)} to ${String(userTierMax)} users`);
-
-const moneyPlainLocal = n => moneyPlainOffer(n);
 
   const lines = [];
 
-  // Header
-
-  lines.push('');
   lines.push(OFFER_LANG === 'fr' ? `Pour le plan ${planName}` : `For the ${planName} plan`);
   lines.push('');
-  lines.push(
-    OFFER_LANG === 'fr'
-      ? `Le prix mensuel pour ${u} utilisateur${u > 1 ? 's' : ''} se calcule de cette façon :`
-      : `The monthly price for ${u} user${u > 1 ? 's' : ''} is calculated as follows:`
-  );
-  lines.push('');
 
-  // User tier explanation
-  lines.push(
-    OFFER_LANG === 'fr'
-      ? `Si vous avez ${u} utilisateur${u > 1 ? 's' : ''}, vous êtes dans la fourchette des ${introRange}.`
-      : `If you have ${u} user${u > 1 ? 's' : ''}, you are in the ${introRange} range.`
-  );
-  lines.push('');
-
-  // ✅ Use tier base price + tier included users (not plan base + 10)
-  lines.push(
-    OFFER_LANG === 'fr'
-
-      ? `Le coût de base de ${moneyPlainLocal(baseTierPrice)} comprend ${fmtNumber(includedAtTier)} utilisateur${includedAtTier > 1 ? 's' : ''}.`
-      : `The base cost of ${moneyPlainLocal(baseTierPrice)} includes ${fmtNumber(includedAtTier)} user${includedAtTier > 1 ? 's' : ''}.`
-  );
-
-const displayedUserRate =
-  u <= acct.includesUsers
-    ? userCostBreakdown(acct.includesUsers + 1, acct).rate
-    : bU.rate;
-   
-lines.push(
-  OFFER_LANG === 'fr'
-    ? `Les utilisateurs supplémentaires sont facturés au coût de ${moneyPlainLocal(displayedUserRate)} chacun.`
-    : `Additional users are billed at ${moneyPlainLocal(displayedUserRate)} each.`
-);
-
-  // Detailed user calc
-  lines.push('');
-  lines.push(OFFER_LANG === 'fr' ? 'Calcul détaillé du prix mensuel' : 'Detailed monthly price calculation');
-
-  if (extraUsersAtTier <= 0) {
-    // ✅ If no extra users in this tier, show clean equality
-    lines.push(`= ${moneyPlainLocal(baseTierPrice)} = ${moneyPlainLocal(baseTierPrice)}`);
+  if (acct.unlimitedUsers) {
+    lines.push(OFFER_LANG === 'fr'
+      ? 'Ce compte comprend des utilisateurs illimités. Les frais sont calculés selon les envois manuels et API.'
+      : 'This account includes unlimited users. Fees are calculated based on manual and API sends.');
   } else {
-    // ✅ Correct formula uses tier base and tier included users
-    lines.push(
-      `= ${moneyPlainLocal(baseTierPrice)} + ((${u} − ${includedAtTier}) × ${moneyPlainLocal(bU.rate)}) = ${moneyPlainLocal(baseTierPrice + (extraUsersAtTier * bU.rate))}`
-    );
+    const includedAtTier = bU.prevLimit;
+    const baseTierPrice = acct.base + bU.prevBase;
+    const extraUsersAtTier = Math.max(0, u - includedAtTier);
+    const userTierMin = (bU.prevLimit + 1);
+    const userTierMax = findUserTierLimit(u, acct);
+    const introRange = u <= acct.includesUsers
+      ? (OFFER_LANG === 'fr'
+          ? `1 à ${fmtNumberLocal(acct.includesUsers)} utilisateurs`
+          : `1 to ${fmtNumberLocal(acct.includesUsers)} users`)
+      : (OFFER_LANG === 'fr'
+          ? `${fmtNumberLocal(userTierMin)} à ${String(userTierMax)} utilisateurs`
+          : `${fmtNumberLocal(userTierMin)} to ${String(userTierMax)} users`);
+    const displayedUserRate = u <= acct.includesUsers
+      ? userCostBreakdown(acct.includesUsers + 1, acct).rate
+      : bU.rate;
+
+    lines.push(OFFER_LANG === 'fr'
+      ? `Le prix mensuel pour ${u} utilisateur${u > 1 ? 's' : ''} se calcule de cette façon :`
+      : `The monthly price for ${u} user${u > 1 ? 's' : ''} is calculated as follows:`);
+    lines.push('');
+    lines.push(OFFER_LANG === 'fr'
+      ? `Si vous avez ${u} utilisateur${u > 1 ? 's' : ''}, vous êtes dans la fourchette des ${introRange}.`
+      : `If you have ${u} user${u > 1 ? 's' : ''}, you are in the ${introRange} range.`);
+    lines.push('');
+    lines.push(OFFER_LANG === 'fr'
+      ? `Le coût de base de ${moneyPlainLocal(baseTierPrice)} comprend ${fmtNumberLocal(includedAtTier)} utilisateur${includedAtTier > 1 ? 's' : ''}.`
+      : `The base cost of ${moneyPlainLocal(baseTierPrice)} includes ${fmtNumberLocal(includedAtTier)} user${includedAtTier > 1 ? 's' : ''}.`);
+    lines.push(OFFER_LANG === 'fr'
+      ? `Les utilisateurs supplémentaires sont facturés au coût de ${moneyPlainLocal(displayedUserRate)} chacun.`
+      : `Additional users are billed at ${moneyPlainLocal(displayedUserRate)} each.`);
+    lines.push('');
+    lines.push(OFFER_LANG === 'fr' ? 'Calcul détaillé du prix mensuel' : 'Detailed monthly price calculation');
+    lines.push(extraUsersAtTier <= 0
+      ? `= ${moneyPlainLocal(baseTierPrice)} = ${moneyPlainLocal(baseTierPrice)}`
+      : `= ${moneyPlainLocal(baseTierPrice)} + ((${u} − ${includedAtTier}) × ${moneyPlainLocal(bU.rate)}) = ${moneyPlainLocal(baseTierPrice + (extraUsersAtTier * bU.rate))}`);
   }
 
-  // API block (only if Enterprise)
-  if (acct.apiAvailable && files > 0 ) {
-
+  if (hasFilePricing(acct) && f > 0) {
     lines.push('');
 
-    const apiTierMax = findApiTierLimit(f);
-    const apiTierMin = (bF.prevLimit + 1);
+    const tierMax = isPerSentPlan ? findFolderTierLimit(f) : findApiTierLimit(f);
+    const tierMin = bF.prevLimit + 1;
+    const tierUnit = isPerSentPlan
+      ? (OFFER_LANG === 'fr' ? 'envois' : 'sends')
+      : 'API';
+    const fileRange = f <= acct.includesFiles && !isPerSentPlan
+      ? (OFFER_LANG === 'fr'
+          ? `1 à ${fmtNumberLocal(acct.includesFiles)} API`
+          : `1 to ${fmtNumberLocal(acct.includesFiles)} API`)
+      : (tierMax === '∞'
+          ? `${fmtNumberLocal(tierMin)} ${t[OFFER_LANG].andUp}`
+          : (OFFER_LANG === 'fr'
+              ? `${fmtNumberLocal(tierMin)} à ${fmtNumberLocal(tierMax)} ${tierUnit}`
+              : `${fmtNumberLocal(tierMin)} to ${fmtNumberLocal(tierMax)} ${tierUnit}`));
 
-    const apiRange =
-      f <= acct.includesFiles
+    lines.push(isPerSentPlan
+      ? (OFFER_LANG === 'fr'
+          ? `Si vous avez ${fmtNumberLocal(f)} envois par mois, vous êtes dans la fourchette des ${fileRange}.`
+          : `If you have ${fmtNumberLocal(f)} sends per month, you are in the ${fileRange} range.`)
+      : (OFFER_LANG === 'fr'
+          ? `Si vous avez ${fmtNumberLocal(f)} API, vous êtes dans la fourchette des ${fileRange}.`
+          : `If you have ${fmtNumberLocal(f)} API, you are in the ${fileRange} range.`));
+    lines.push('');
+
+    if (isPerSentPlan) {
+      lines.push(bF.prevLimit <= 0
         ? (OFFER_LANG === 'fr'
-            ? `1 à ${fmtNumber(acct.includesFiles)} API`
-            : `1 to ${fmtNumber(acct.includesFiles)} API`)
-        : (apiTierMax === '∞'
-            ? `${fmtNumber(apiTierMin)} ${t[OFFER_LANG].andUp}`
-            : `${fmtNumber(apiTierMin)} à ${fmtNumber(apiTierMax)} API`);
-
-    lines.push(
-      OFFER_LANG === 'fr'
-        ? `Si vous avez ${fmtNumber(f)} API, vous êtes dans la fourchette des ${apiRange}.`
-        : `If you have ${fmtNumber(f)} API, you are in the ${apiRange} range.`
-    );
-    lines.push('');
-    // ✅ Included/base line should match the ACTIVE API tier (prevLimit + prevBase)
-    // If you're still within the plan-included 1–100, we keep the classic message.
-    if (f <= acct.includesFiles) {
-      lines.push(
-        OFFER_LANG === 'fr'
-          ? `Les ${fmtNumber(acct.includesFiles)} premières API sont incluses dans le forfait.`
-          : `The first ${fmtNumber(acct.includesFiles)} API are included in the plan.`
-      );
+            ? 'Aucun envoi n’est inclus dans ce palier.'
+            : 'No sends are included in this tier.')
+        : (OFFER_LANG === 'fr'
+            ? `Les ${fmtNumberLocal(bF.prevLimit)} premiers envois sont inclus dans ce palier pour ${moneyPlainLocal(bF.prevBase)}.`
+            : `The first ${fmtNumberLocal(bF.prevLimit)} sends are included in this tier for ${moneyPlainLocal(bF.prevBase)}.`));
+    } else if (f <= acct.includesFiles) {
+      lines.push(OFFER_LANG === 'fr'
+        ? `Les ${fmtNumberLocal(acct.includesFiles)} premières API sont incluses dans le forfait.`
+        : `The first ${fmtNumberLocal(acct.includesFiles)} API are included in the plan.`);
     } else {
-      // Example for 2,500 API:
-      // prevLimit = 1100 (tier base included), prevBase = 1485.50 (tier base price), rate = 1.21
-      lines.push(
-        OFFER_LANG === 'fr'
-          ? `Les ${fmtNumber(bF.prevLimit)} premiers envois API sont inclus dans le forfait pour ${moneyPlainLocal(bF.prevBase)}.`
-          : `The first ${fmtNumber(bF.prevLimit)} API sends are included in the plan for ${moneyPlainLocal(bF.prevBase)}.`
-      );
+      lines.push(OFFER_LANG === 'fr'
+        ? `Les ${fmtNumberLocal(bF.prevLimit)} premiers envois API sont inclus dans le forfait pour ${moneyPlainLocal(bF.prevBase)}.`
+        : `The first ${fmtNumberLocal(bF.prevLimit)} API sends are included in the plan for ${moneyPlainLocal(bF.prevBase)}.`);
     }
 
-    if (f > acct.includesFiles) {
-      lines.push(
-        OFFER_LANG === 'fr'
-          ? `Les API supplémentaires sont facturées au coût de ${moneyPlainLocal(bF.rate)} chacune.`
-          : `Additional API are billed at ${moneyPlainLocal(bF.rate)} each.`
-      );
+    if (f > acct.includesFiles || isPerSentPlan) {
+      lines.push(isPerSentPlan
+        ? (OFFER_LANG === 'fr'
+            ? `Les envois supplémentaires sont facturés au coût de ${moneyPlainLocal(bF.rate)} chacun.`
+            : `Additional sends are billed at ${moneyPlainLocal(bF.rate)} each.`)
+        : (OFFER_LANG === 'fr'
+            ? `Les API supplémentaires sont facturées au coût de ${moneyPlainLocal(bF.rate)} chacune.`
+            : `Additional API are billed at ${moneyPlainLocal(bF.rate)} each.`));
       lines.push('');
-      lines.push(OFFER_LANG === 'fr' ? 'Calcul détaillé des frais API' : 'Detailed API fee calculation');
-      lines.push(
-        `= ${moneyPlainLocal(bF.prevBase)} + (${fmtNumber(bF.inTierCount)} × ${moneyPlainLocal(bF.rate)}) = ${moneyPlainLocal(bF.apiTotal)}`
-      );
+      lines.push(isPerSentPlan
+        ? (OFFER_LANG === 'fr' ? 'Calcul détaillé des frais d’envois' : 'Detailed send fee calculation')
+        : (OFFER_LANG === 'fr' ? 'Calcul détaillé des frais API' : 'Detailed API fee calculation'));
+      lines.push(`= ${moneyPlainLocal(bF.prevBase)} + (${fmtNumberLocal(bF.inTierCount)} × ${moneyPlainLocal(bF.rate)}) = ${moneyPlainLocal(bF.apiTotal)}`);
     } else {
-      lines.push(
-        OFFER_LANG === 'fr'
-          ? `Aucun frais d’API.`
-          : `No API fees.`
-      );
+      lines.push(OFFER_LANG === 'fr' ? 'Aucun frais d’API.' : 'No API fees.');
     }
   }
 
-  // Total
   lines.push('');
-  lines.push(
-    OFFER_LANG === 'fr'
-      ? `Sous-total mensuel`
-      : `Monthly subtotal`
-  );
+  lines.push(OFFER_LANG === 'fr' ? 'Sous-total mensuel' : 'Monthly subtotal');
   lines.push(moneyPlainLocal(totalMonthly));
+
+  return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+const FEATURE_GROUPS = [
+  {
+    key: 'basic',
+    title: { fr: 'Affaires de Base', en: 'Business Basic' },
+    itemIds: [
+      'basic_users_included',
+      'basic_monthly_billing',
+      'basic_manual_documents',
+      'basic_signatures',
+      'basic_templates',
+      'basic_signer_messages',
+      'basic_two_factor',
+      'basic_team_templates',
+      'basic_signed_documents_email',
+    ],
+  },
+  {
+    key: 'pro',
+    title: { fr: 'Affaires Pro', en: 'Business Pro' },
+    itemIds: [
+      'pro_email_branding',
+      'pro_pdf_converter',
+      'pro_billing_entities',
+      'pro_signer_delegation',
+      'pro_template_name_recognition',
+      'pro_signer_groups',
+      'pro_field_dependencies',
+      'pro_delayed_sending',
+      'pro_batch_deletion',
+      'pro_content_templates',
+      'pro_consultation_block',
+      'pro_closed_file_types',
+    ],
+  },
+  {
+    key: 'enterprise',
+    title: { fr: 'Entreprise', en: 'Enterprise' },
+    itemIds: [
+      'enterprise_api',
+      'enterprise_bulk_sending',
+      'enterprise_shared_links',
+      'enterprise_sso',
+      'enterprise_interface_branding',
+      'enterprise_text_zone_recognition',
+      'enterprise_role_assignment',
+      'enterprise_auto_delete',
+      'enterprise_pdfa',
+      'enterprise_moneris',
+    ],
+  },
+  {
+    key: 'perSent',
+    title: { fr: 'Entreprise par envois', en: 'Enterprise per-sent' },
+    itemIds: [
+      'per_sent_unlimited_users',
+      'per_sent_manual_api_billing',
+      'per_sent_fixed_fee',
+    ],
+  },
+];
+
+const FEATURE_ITEMS = {
+  basic_users_included: {
+    fr: 'Jusqu’à 10 utilisateurs inclus',
+    en: 'Up to 10 users included',
+  },
+  basic_monthly_billing: {
+    fr: 'Facturation mensuelle',
+    en: 'Monthly billing',
+  },
+  basic_manual_documents: {
+    fr: 'Nombre de documents manuels illimité',
+    en: 'Unlimited number of manual documents',
+  },
+  basic_signatures: {
+    fr: 'Nombre de signatures illimité',
+    en: 'Unlimited number of signatures',
+  },
+  basic_templates: {
+    fr: 'Modèles personnalisables et réutilisables illimités',
+    en: 'Unlimited customizable and reusable templates',
+  },
+  basic_signer_messages: {
+    fr: 'Messages personnalisés à l’intention des signataires',
+    en: 'Personalized messages for signers',
+  },
+  basic_two_factor: {
+    fr: 'Double authentification par messagerie texte, téléphone ou question secrète',
+    en: 'Two-factor authentication by text message, phone, or secret question',
+  },
+  basic_team_templates: {
+    fr: 'Créer des modèles d’équipe',
+    en: 'Create team templates',
+  },
+  basic_signed_documents_email: {
+    fr: 'Recevoir un courriel de suivi et des documents signés automatiquement',
+    en: 'Automatically receive follow-up emails and signed documents',
+  },
+  pro_email_branding: {
+    fr: 'Intégration de l’image de marque au courriel (logo)',
+    en: 'Branding integration in email (logo)',
+  },
+  pro_pdf_converter: {
+    fr: 'Convertisseur PDF pour documents Word, Excel, PPT',
+    en: 'PDF converter for Word, Excel, and PPT documents',
+  },
+  pro_billing_entities: {
+    fr: 'Entités de facturation multiples',
+    en: 'Multiple billing entities',
+  },
+  pro_signer_delegation: {
+    fr: 'Délégation et réassignation des signataires',
+    en: 'Delegation and reassignment of signers',
+  },
+  pro_template_name_recognition: {
+    fr: 'Reconnaissance de modèles par nom',
+    en: 'Template recognition by name',
+  },
+  pro_signer_groups: {
+    fr: 'Groupes de signataires',
+    en: 'Signer groups',
+  },
+  pro_field_dependencies: {
+    fr: 'Dépendances sur champs de signature et listes déroulantes',
+    en: 'Signature field dependencies and drop-down lists',
+  },
+  pro_delayed_sending: {
+    fr: 'Envois différés',
+    en: 'Delayed sending',
+  },
+  pro_batch_deletion: {
+    fr: 'Suppression de documents par lot',
+    en: 'Batch document deletion',
+  },
+  pro_content_templates: {
+    fr: 'Modèles de contenu',
+    en: 'Content templates',
+  },
+  pro_consultation_block: {
+    fr: 'Bloc de consultation',
+    en: 'Consultation block',
+  },
+  pro_closed_file_types: {
+    fr: 'Type de fichiers « fermés »',
+    en: '“Closed” file types',
+  },
+  enterprise_api: {
+    fr: 'Intégrations API',
+    en: 'API integrations',
+    proposal_fr: 'Accès aux intégrations API',
+    proposal_en: 'Access to API integrations',
+  },
+  enterprise_bulk_sending: {
+    fr: 'Envois groupés',
+    en: 'Bulk sending',
+  },
+  enterprise_shared_links: {
+    fr: 'Création de liens partagés',
+    en: 'Shared link creation',
+  },
+  enterprise_sso: {
+    fr: 'SSO',
+    en: 'SSO',
+    proposal_fr: 'Accès au SSO (authentification unique)',
+    proposal_en: 'Access to SSO (Single Sign-On)',
+  },
+  enterprise_interface_branding: {
+    fr: 'Image de marque dans l’interface',
+    en: 'Branding in the interface',
+  },
+  enterprise_text_zone_recognition: {
+    fr: 'Reconnaissance de modèles par zone de texte',
+    en: 'Template recognition by text zone',
+  },
+  enterprise_role_assignment: {
+    fr: 'Association de rôle dans les modèles',
+    en: 'Role assignment in templates',
+  },
+  enterprise_auto_delete: {
+    fr: 'Suppression automatique des fichiers',
+    en: 'Automatic file deletion',
+  },
+  enterprise_pdfa: {
+    fr: 'Validation et conversion PDF/A',
+    en: 'PDF/A validation and conversion',
+  },
+  enterprise_moneris: {
+    fr: 'Percevoir des paiements via Moneris',
+    en: 'Collect payments through Moneris',
+  },
+  per_sent_unlimited_users: {
+    fr: 'Utilisateurs illimités inclus',
+    en: 'Unlimited users included',
+  },
+  per_sent_manual_api_billing: {
+    fr: 'Envois manuels et API facturés selon l’utilisation mensuelle',
+    en: 'Manual and API sends billed according to monthly usage',
+  },
+  per_sent_fixed_fee: {
+    fr: 'Frais fixes mensuels de 222,80 $, même si aucun envoi n’est complété',
+    en: 'Fixed monthly fee of $222.80, even if no send is completed',
+  },
+};
+
+function escapeHTML(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function featureText(item) {
+  if (!item) return '';
+  if (typeof item === 'function') return item();
+  return item[OFFER_LANG] || item.fr || item.en || '';
+}
+
+function featureProposalText(item) {
+  if (!item) return '';
+  const key = OFFER_LANG === 'en' ? 'proposal_en' : 'proposal_fr';
+  return item[key] || featureText(item);
+}
+
+function includedFeatureGroups(planKey) {
+  if (planKey === 'basic') return ['basic'];
+  if (planKey === 'pro') return ['basic', 'pro'];
+  if (planKey === 'perFolder') return ['basic', 'pro', 'enterprise', 'perSent'];
+  return ['basic', 'pro', 'enterprise'];
+}
+
+function dynamicFeatureItems(sim) {
+  const acct = ACCOUNTS[sim.planKey] || ACCOUNTS.enterprise;
+  const users = Math.max(0, Math.floor(Number(sim.users) || 0));
+  const files = Math.max(0, Math.floor(Number(sim.files) || 0));
+  const items = [];
+
+  if (hasUserPricing(acct) && users > acct.includesUsers) {
+    items.push({
+      id: 'dynamic_extra_users',
+      groupKey: 'reminders',
+      fr: `${fmtNumberOfferPlain(users)} utilisateurs au total; ${fmtNumberOfferPlain(acct.includesUsers)} utilisateurs inclus et les utilisateurs supplémentaires facturés selon le palier choisi`,
+      en: `${fmtNumberOfferPlain(users)} total users; ${fmtNumberOfferPlain(acct.includesUsers)} users included and additional users billed according to the selected tier`,
+    });
+  }
+
+  if (sim.planKey === 'enterprise' && files > 0) {
+    items.push({
+      id: 'dynamic_api_usage',
+      groupKey: 'reminders',
+      fr: 'Seuls les dossiers API complétés comptent dans l’utilisation mensuelle',
+      en: 'Only completed API folders count toward monthly usage',
+    });
+  }
+
+  return items;
+}
+
+function allFeatureItems(sim) {
+  const staticItems = FEATURE_GROUPS.flatMap(group =>
+    group.itemIds.map(id => ({ id, groupKey: group.key, ...FEATURE_ITEMS[id] }))
+  );
+  return staticItems.concat(dynamicFeatureItems(sim));
+}
+
+function defaultFeatureIds(sim) {
+  const files = Math.max(0, Math.floor(Number(sim.files) || 0));
+  const users = Math.max(0, Math.floor(Number(sim.users) || 0));
+  const acct = ACCOUNTS[sim.planKey] || ACCOUNTS.enterprise;
+  const ids = [];
+  const add = id => {
+    if (id && !ids.includes(id)) ids.push(id);
+  };
+
+  if (hasUserPricing(acct) && users > acct.includesUsers) add('dynamic_extra_users');
+
+  if (sim.planKey === 'basic') {
+    ['basic_manual_documents', 'basic_signatures', 'basic_templates', 'basic_two_factor', 'basic_signed_documents_email'].forEach(add);
+  } else if (sim.planKey === 'pro') {
+    ['pro_email_branding', 'pro_pdf_converter', 'pro_billing_entities', 'pro_signer_delegation', 'pro_field_dependencies', 'basic_templates'].forEach(add);
+  } else if (sim.planKey === 'perFolder') {
+    ['per_sent_unlimited_users', 'per_sent_manual_api_billing', 'per_sent_fixed_fee', 'pro_billing_entities', 'pro_email_branding'].forEach(add);
+  } else {
+    if (files > 0) {
+      add('enterprise_api');
+      add('enterprise_shared_links');
+      add('enterprise_bulk_sending');
+      add('dynamic_api_usage');
+    }
+    ['enterprise_sso', 'enterprise_interface_branding', 'pro_billing_entities', 'pro_email_branding', 'pro_pdf_converter'].forEach(add);
+  }
+
+  return ids.slice(0, 5);
+}
+
+function normalizeFeatureSelection(features) {
+  if (!features || !Array.isArray(features.selectedIds)) return null;
+  return {
+    selectedIds: [...new Set(features.selectedIds.map(String))],
+    customText: String(features.customText || '').trim(),
+    customChecked: Boolean(features.customChecked),
+  };
+}
+
+function selectedFeatureIds(sim) {
+  const selection = normalizeFeatureSelection(sim.features);
+  return selection ? selection.selectedIds : defaultFeatureIds(sim);
+}
+
+function selectedFeatureCount(sim) {
+  const selection = normalizeFeatureSelection(sim.features);
+  const customCount = selection?.customChecked && selection.customText ? 1 : 0;
+  return selectedFeatureIds(sim).length + customCount;
+}
+
+function buildDiscussAsDiscussedBlock(planKey, apiFiles, users, featureSelection) {
+  const sim = normalizeOfferSimulation({
+    planKey,
+    files: apiFiles,
+    users,
+    features: featureSelection,
+  });
+  const selected = new Set(selectedFeatureIds(sim));
+  const lines = allFeatureItems(sim)
+    .filter(item => selected.has(item.id))
+    .map(item => `• ${featureProposalText(item)}`);
+
+  const selection = normalizeFeatureSelection(sim.features);
+  if (selection?.customChecked && selection.customText) {
+    lines.push(`• ${selection.customText}`);
+  }
 
   return lines.join('\n');
 }
 
-function buildDiscussAsDiscussedBlock(planKey, apiFiles) {
-  const isEN = (OFFER_LANG === 'en');
-  const hasAPI = (planKey === 'enterprise' && Number(apiFiles || 0) > 0);
+    const SIGNERS = [
+      { value: 'christopher', name: 'Christopher Lord', email: 'christopher.lord@ezsign.ca' },
+      { value: 'marie-eve', name: 'Marie-Ève Gauvin Rondeau', email: 'marie-eve.rondeau@ezsign.ca' },
+      { value: 'meher', name: 'Meher Nalbandian', email: 'meher.nalbandian@ezsign.ca' },
+      { value: 'other', name: '', email: '' },
+    ];
 
-  if (isEN) {
-    if (planKey === 'basic') {
-      return [
-        '• Unlimited documents and signings',
-        '• eZsign e-signatures are legal and secure',
-        '• Training sessions are included at no extra cost.',
-        '• All data is securely hosted in Canada, ensuring compliance with Canadian regulations.',
-      ].join('\n');
+    let offerSimulationState = [{ planKey: 'enterprise', files: 0, users: 10, features: null }];
+
+    function normalizeOfferSimulation(sim) {
+      const planKey = ACCOUNTS[sim?.planKey] ? sim.planKey : 'enterprise';
+      const acct = ACCOUNTS[planKey];
+      return {
+        planKey,
+        files: hasFilePricing(acct) ? Math.max(0, Math.floor(Number(sim?.files) || 0)) : 0,
+        users: hasUserPricing(acct) ? Math.max(1, Math.floor(Number(sim?.users) || acct.includesUsers)) : 0,
+        features: normalizeFeatureSelection(sim?.features),
+      };
     }
 
-    if (planKey === 'pro') {
-      return [
-        '• Unlimited documents and signings',
-        '• eZsign e-signatures are legal and secure',
-        '• Personalized branding',
-        '• Training sessions are included at no extra cost.',
-        '• All data is securely hosted in Canada, ensuring compliance with Canadian regulations.',
-      ].join('\n');
+    function readOfferSimulationsFromDOM() {
+      if (!offerSimulations) return offerSimulationState.map(normalizeOfferSimulation);
+
+      const rows = Array.from(offerSimulations.querySelectorAll('[data-simulation-index]'));
+      if (!rows.length) return offerSimulationState.map(normalizeOfferSimulation);
+
+      return rows.map(row => {
+        const index = Number(row.dataset.simulationIndex || 0);
+        const planKey = row.querySelector('[data-offer-plan]')?.value || 'enterprise';
+        const acct = ACCOUNTS[planKey] || ACCOUNTS.enterprise;
+        return normalizeOfferSimulation({
+          planKey,
+          files: hasFilePricing(acct) ? row.querySelector('[data-offer-files]')?.value : 0,
+          users: hasUserPricing(acct) ? (row.querySelector('[data-offer-users]')?.value || acct.includesUsers) : 0,
+          features: offerSimulationState[index]?.features || null,
+        });
+      });
     }
 
-    // enterprise
-    if (hasAPI) {
-      return [
-        '• Unlimited manual document sending and signings via the eZsign platform',
-        '• Only completed API folders count toward your monthly usage',
-        '• Personalized branding included (custom colors, logos, and email appearance)',
-        '• Multiple billing entities and different logos can be configured per account',
-      ].join('\n');
+    function syncOfferSimulationStateFromDOM() {
+      offerSimulationState = readOfferSimulationsFromDOM().slice(0, 3);
+      if (!offerSimulationState.length) {
+        offerSimulationState = [{ planKey: 'enterprise', files: 0, users: 10, features: null }];
+      }
     }
 
-    // enterprise without API
-    return [
-      '• Unlimited documents and signings',
-      '• eZsign e-signatures are legal and secure',
-      '• Personalized branding',
-      '• Training sessions are included at no extra cost.',
-      '• All data is securely hosted in Canada, ensuring compliance with Canadian regulations.',
-    ].join('\n');
-  }
+    function offerPlanOptionsHTML(selected) {
+      return `
+        <option value="enterprise"${selected === 'enterprise' ? ' selected' : ''}>${LANG === 'fr' ? 'Entreprise' : 'Enterprise'}</option>
+        <option value="basic"${selected === 'basic' ? ' selected' : ''}>Business Basic</option>
+        <option value="pro"${selected === 'pro' ? ' selected' : ''}>Business Pro</option>
+        <option value="perFolder"${selected === 'perFolder' ? ' selected' : ''}>${t[LANG].accountByFolder}</option>`;
+    }
 
-  // FR
-  if (planKey === 'basic') {
-    return [
-      '• Documents et signatures illimités',
-      '• Les signatures électroniques eZsign sont légales et sécurisées',
-      '• Les formations sont incluses sans frais supplémentaires.',
-      '• Toutes les données sont hébergées de façon sécurisée au Canada, assurant la conformité aux réglementations canadiennes.',
-    ].join('\n');
-  }
+    function renderOfferSimulations() {
+      if (!offerSimulations) return;
 
-  if (planKey === 'pro') {
-    return [
-      '• Documents et signatures illimités',
-      '• Les signatures électroniques eZsign sont légales et sécurisées',
-      '• Image de marque incluse (couleurs, logos et apparence des courriels)',
-      '• Les formations sont incluses sans frais supplémentaires.',
-      '• Toutes les données sont hébergées de façon sécurisée au Canada, assurant la conformité aux réglementations canadiennes.',
-    ].join('\n');
-  }
+      offerSimulationState = offerSimulationState.map(normalizeOfferSimulation).slice(0, 3);
+      offerSimulations.innerHTML = offerSimulationState.map((sim, index) => {
+        const acct = ACCOUNTS[sim.planKey];
+        const fileFieldVisible = hasFilePricing(acct);
+        const fileLabel = acct.filePricing === 'perSent' ? t[LANG].folderCount : t[LANG].apiCount;
+        const userFieldVisible = hasUserPricing(acct);
+        const featureCount = selectedFeatureCount(sim);
+        return `
+          <section class="offer-simulation" data-simulation-index="${index}">
+            <div class="offer-sim-head">
+              <div class="offer-sim-title">
+                <strong>${t[LANG].simulation} ${index + 1}</strong>
+                <button type="button" class="chip btn-ghost feature-btn" data-open-features="${index}">${t[LANG].featureButton} (${featureCount})</button>
+              </div>
+              ${index > 0 ? `<button type="button" class="link-btn" data-remove-simulation="${index}">${t[LANG].removeSimulation}</button>` : ''}
+            </div>
+            <div class="controls offer-controls">
+              <div class="field">
+                <label>${t[LANG].acct}</label>
+                <select data-offer-plan>${offerPlanOptionsHTML(sim.planKey)}</select>
+              </div>
 
-  // enterprise
-  if (hasAPI) {
-    return [
-      '• Envois et signatures manuels illimités via la plateforme eZsign',
-      '• Seuls les dossiers API complétés comptent dans votre utilisation mensuelle',
-      '• Personnalisation de la marque incluse (couleurs, logos et apparence des courriels)',
-      '• Plusieurs entités de facturation et différents logos peuvent être configurés par compte',
-    ].join('\n');
-  }
+              <div class="field" data-offer-files-field style="${fileFieldVisible ? '' : 'display:none'}">
+                <label>${fileLabel}</label>
+                <input data-offer-files type="number" min="0" inputmode="numeric" placeholder="${LANG === 'fr' ? 'Ex, 350' : 'e.g., 350'}" value="${sim.files}" />
+              </div>
 
-  // enterprise without API
-  return [
-    '• Documents et signatures illimités',
-    '• Les signatures électroniques eZsign sont légales et sécurisées',
-    '• Image de marque incluse (couleurs, logos et apparence des courriels)',
-    '• Les formations sont incluses sans frais supplémentaires.',
-    '• Toutes les données sont hébergées de façon sécurisée au Canada, assurant la conformité aux réglementations canadiennes.',
-  ].join('\n');
-}
+              <div class="field" style="${userFieldVisible ? '' : 'display:none'}">
+                <label>${t[LANG].users}</label>
+                <input data-offer-users type="number" min="1" inputmode="numeric" placeholder="${LANG === 'fr' ? 'Ex, 11' : 'e.g., 11'}" value="${sim.users}" />
+              </div>
+              ${userFieldVisible ? '' : `<div class="note offer-unlimited-users">${t[LANG].unlimitedUsers}</div>`}
+            </div>
+          </section>`;
+      }).join('');
 
+      offerSimulations.querySelectorAll('[data-offer-plan]').forEach(select => {
+        select.addEventListener('change', () => {
+          const row = select.closest('[data-simulation-index]');
+          const index = Number(row?.dataset.simulationIndex || 0);
+          syncOfferSimulationStateFromDOM();
+          if (offerSimulationState[index]) offerSimulationState[index].features = null;
+          renderOfferSimulations();
+          updateOfferPreview();
+        });
+      });
+
+      offerSimulations.querySelectorAll('[data-offer-files], [data-offer-users]').forEach(input => {
+        input.addEventListener('input', () => {
+          syncOfferSimulationStateFromDOM();
+          updateOfferPreview();
+        });
+      });
+
+      offerSimulations.querySelectorAll('[data-remove-simulation]').forEach(button => {
+        button.addEventListener('click', () => {
+          const index = Number(button.dataset.removeSimulation);
+          syncOfferSimulationStateFromDOM();
+          offerSimulationState.splice(index, 1);
+          renderOfferSimulations();
+          updateOfferPreview();
+        });
+      });
+
+      offerSimulations.querySelectorAll('[data-open-features]').forEach(button => {
+        button.addEventListener('click', () => {
+          openFeatureModal(Number(button.dataset.openFeatures || 0));
+        });
+      });
+
+      if (addSimulationBtn) {
+        addSimulationBtn.disabled = offerSimulationState.length >= 3;
+        addSimulationBtn.textContent = offerSimulationState.length >= 3 ? t[LANG].maxSimulations : t[LANG].addSimulation;
+      }
+    }
 
     function updateOfferPreview() {
-      if (!offerPreview || !offerPlan || !offerUsers) return;
+      if (!offerPreview) return;
+      const simulations = readOfferSimulationsFromDOM();
+      offerPreview.value = simulations.map((sim, index) =>
+        buildOfferSimulationBlock(sim.planKey, sim.files, sim.users, index + 1, simulations.length)
+      ).join('\n\n');
+    }
 
-      const planKey = offerPlan.value || 'enterprise';
-      const acct = ACCOUNTS[planKey];
-      const files = acct.apiAvailable && offerFiles ? offerFiles.value : 0;
-      const users = offerUsers.value;
+    function offerGenerateLabel() {
+      const word = outputWordCheck ? outputWordCheck.checked : true;
+      const pdf = outputPdfCheck ? outputPdfCheck.checked : true;
+      if (word && pdf) return t[LANG].generateWordPdf;
+      if (word) return t[LANG].generateWordOnly;
+      if (pdf) return t[LANG].generatePdfOnly;
+      return t[LANG].generateOffer;
+    }
 
-      offerPreview.value = buildOfferSimulationBlock(planKey, files, users);
+    function refreshOfferGenerateButtonLabel() {
+      if (!offerGenerateBtn || offerGenerateBtn.disabled) return;
+      offerGenerateBtn.textContent = offerGenerateLabel();
+    }
+
+    let activeFeatureSimulationIndex = null;
+
+    function renderFeatureChecklist(index) {
+      if (!featureChecklist) return;
+      const sim = normalizeOfferSimulation(offerSimulationState[index] || {});
+      const selected = new Set(selectedFeatureIds(sim));
+      const items = allFeatureItems(sim);
+      const groups = FEATURE_GROUPS.map(group => ({
+        key: group.key,
+        title: group.title[OFFER_LANG] || group.title.fr,
+        items: items.filter(item => item.groupKey === group.key),
+      }));
+      const dynamicItems = items.filter(item => item.groupKey === 'reminders');
+      if (dynamicItems.length) {
+        groups.push({
+          key: 'reminders',
+          title: OFFER_LANG === 'fr' ? 'Rappels selon la simulation' : 'Simulation reminders',
+          items: dynamicItems,
+        });
+      }
+
+      featureChecklist.innerHTML = groups
+        .filter(group => group.items.length)
+        .map(group => `
+          <section class="feature-group">
+            <h4 class="feature-group-title">${escapeHTML(group.title)}</h4>
+            <div class="feature-options">
+              ${group.items.map(item => `
+                <label class="feature-option">
+                  <input type="checkbox" data-feature-id="${escapeHTML(item.id)}"${selected.has(item.id) ? ' checked' : ''} />
+                  <span>${escapeHTML(featureText(item))}</span>
+                </label>
+              `).join('')}
+            </div>
+          </section>
+        `).join('');
+
+      const selection = normalizeFeatureSelection(sim.features);
+      if (featureOtherCheck) featureOtherCheck.checked = Boolean(selection?.customChecked && selection.customText);
+      if (featureOtherText) featureOtherText.value = selection?.customText || '';
+    }
+
+    function openFeatureModal(index) {
+      syncOfferSimulationStateFromDOM();
+      activeFeatureSimulationIndex = Math.max(0, Math.min(index, offerSimulationState.length - 1));
+
+      if (featureModalTitle) {
+        featureModalTitle.textContent = `${t[LANG].featureTitle} - ${t[LANG].simulation} ${activeFeatureSimulationIndex + 1}`;
+      }
+      if (featureModalIntro) featureModalIntro.textContent = t[LANG].featureIntro;
+      if (featureOtherLabel) featureOtherLabel.textContent = t[LANG].featureOther;
+      if (featureOtherText) featureOtherText.placeholder = t[LANG].featureOtherPlaceholder;
+      if (featureDefaultsBtn) featureDefaultsBtn.textContent = t[LANG].featureDefaults;
+      if (featureSaveBtn) featureSaveBtn.textContent = t[LANG].featureApply;
+
+      renderFeatureChecklist(activeFeatureSimulationIndex);
+      if (featureModal) {
+        featureModal.classList.add('open');
+        featureModal.setAttribute('aria-hidden', 'false');
+      }
+    }
+
+    function closeFeatureModal() {
+      if (!featureModal) return;
+      featureModal.classList.remove('open');
+      featureModal.setAttribute('aria-hidden', 'true');
+      activeFeatureSimulationIndex = null;
+    }
+
+    function saveFeatureSelection() {
+      if (activeFeatureSimulationIndex === null || !offerSimulationState[activeFeatureSimulationIndex]) return;
+      const selectedIds = Array.from(featureChecklist?.querySelectorAll('[data-feature-id]:checked') || [])
+        .map(input => input.dataset.featureId);
+      const customText = (featureOtherText?.value || '').trim();
+      offerSimulationState[activeFeatureSimulationIndex].features = {
+        selectedIds,
+        customText,
+        customChecked: Boolean(featureOtherCheck?.checked && customText),
+      };
+      renderOfferSimulations();
+      updateOfferPreview();
+      closeFeatureModal();
+    }
+
+    function refreshSignerUI() {
+      if (!offerSigner || !offerSignerOtherFields) return;
+      const isOther = offerSigner.value === 'other';
+      offerSignerOtherFields.style.display = isOther ? '' : 'none';
+    }
+
+    function getSignerInfo() {
+      const value = offerSigner?.value || 'christopher';
+      if (value === 'other') {
+        return {
+          name: (offerSignerName?.value || '').trim(),
+          email: (offerSignerEmail?.value || '').trim(),
+        };
+      }
+      return SIGNERS.find(signer => signer.value === value) || SIGNERS[0];
     }
 
     function refreshOfferUI() {
-      if (!offerTitle || !offerPlan) return;
+      syncOfferSimulationStateFromDOM();
+      if (offerTitle) offerTitle.textContent = t[LANG].offerTitle;
+      if (offerBtn) offerBtn.textContent = t[LANG].offerTop;
+      if (offerCompanyLabel) offerCompanyLabel.textContent = t[LANG].companyName;
+      if (offerCompanyName) offerCompanyName.placeholder = t[LANG].companyPlaceholder;
+      if (offerSignerLabel) offerSignerLabel.textContent = t[LANG].proposalCreator;
+      if (offerSignerNameLabel) offerSignerNameLabel.textContent = t[LANG].creatorName;
+      if (offerSignerEmailLabel) offerSignerEmailLabel.textContent = t[LANG].creatorEmail;
+      if (offerPreviewLabel) offerPreviewLabel.textContent = t[LANG].offerPreview;
+      if (outputWordLabel) outputWordLabel.textContent = t[LANG].outputWord;
+      if (outputPdfLabel) outputPdfLabel.textContent = t[LANG].outputPdf;
+      refreshOfferGenerateButtonLabel();
 
-      offerTitle.textContent = LANG === 'fr' ? 'Offre de service' : 'Service offer';
+      if (offerSigner) {
+        offerSigner.querySelector('option[value="other"]').textContent = t[LANG].proposalCreatorOther;
+      }
 
-      const planKey = offerPlan.value || 'enterprise';
-      const acct = ACCOUNTS[planKey];
-
-      if (offerFilesField) offerFilesField.style.display = acct.apiAvailable ? '' : 'none';
-
+      renderOfferSimulations();
+      refreshSignerUI();
       refreshOfferDatesNoteOnly();
+      updateOfferPreview();
+      if (featureModal?.classList.contains('open') && activeFeatureSimulationIndex !== null) {
+        openFeatureModal(activeFeatureSimulationIndex);
+      }
     }
 
 function openOfferModal() {
   if (!offerModal) return;
 
-  // Sync toggle UI to current offer language
   setOfferLang(OFFER_LANG);
-
   refreshOfferUI();
   offerModal.classList.add('open');
   offerModal.setAttribute('aria-hidden', 'false');
@@ -1063,12 +1783,12 @@ function setOfferLang(lang){
     b.setAttribute('aria-checked', active ? 'true' : 'false');
   });
 
-  // ✅ Refresh only the offer preview + offer dates in the modal
   updateOfferPreview();
   refreshOfferDatesNoteOnly();
+  if (featureModal?.classList.contains('open') && activeFeatureSimulationIndex !== null) {
+    openFeatureModal(activeFeatureSimulationIndex);
+  }
 }
-
-
 
 
     async function downloadBlobAsFile(blob, filename) {
@@ -1147,45 +1867,100 @@ document.querySelectorAll('[data-offer-lang]').forEach(btn => {
     // Offer open
     if (offerBtn) offerBtn.addEventListener('click', openOfferModal);
 
-    if (offerPlan) offerPlan.addEventListener('change', refreshOfferUI);
-    if (offerFiles) offerFiles.addEventListener('input', updateOfferPreview);
-    if (offerUsers) offerUsers.addEventListener('input', updateOfferPreview);
+    if (addSimulationBtn) {
+      addSimulationBtn.addEventListener('click', () => {
+        syncOfferSimulationStateFromDOM();
+        if (offerSimulationState.length >= 3) return;
+        offerSimulationState.push({ planKey: 'enterprise', files: 0, users: 10, features: null });
+        renderOfferSimulations();
+        updateOfferPreview();
+      });
+    }
+
+    if (offerSigner) {
+      offerSigner.addEventListener('change', refreshSignerUI);
+    }
+    if (offerSignerName) offerSignerName.addEventListener('input', updateOfferPreview);
+    if (offerSignerEmail) offerSignerEmail.addEventListener('input', updateOfferPreview);
+    if (featureSaveBtn) featureSaveBtn.addEventListener('click', saveFeatureSelection);
+    if (featureDefaultsBtn) {
+      featureDefaultsBtn.addEventListener('click', () => {
+        if (activeFeatureSimulationIndex === null || !offerSimulationState[activeFeatureSimulationIndex]) return;
+        offerSimulationState[activeFeatureSimulationIndex].features = null;
+        renderFeatureChecklist(activeFeatureSimulationIndex);
+        renderOfferSimulations();
+        updateOfferPreview();
+      });
+    }
+    if (featureOtherText && featureOtherCheck) {
+      featureOtherText.addEventListener('input', () => {
+        if (featureOtherText.value.trim()) featureOtherCheck.checked = true;
+      });
+    }
+    [outputWordCheck, outputPdfCheck].forEach(input => {
+      if (input) input.addEventListener('change', refreshOfferGenerateButtonLabel);
+    });
 
     if (offerGenerateBtn) {
       offerGenerateBtn.addEventListener('click', async () => {
         const companyName = (offerCompanyName?.value || '').trim();
         if (!companyName) {
-          alert(LANG === 'fr' ? 'Entre le nom de la compagnie.' : 'Enter the company name.');
+          alert(t[LANG].enterCompany);
           offerCompanyName?.focus();
           return;
         }
+        const outputFormats = {
+          word: outputWordCheck ? outputWordCheck.checked : true,
+          pdf: outputPdfCheck ? outputPdfCheck.checked : true,
+        };
+        if (!outputFormats.word && !outputFormats.pdf) {
+          alert(t[LANG].chooseOutput);
+          outputWordCheck?.focus();
+          return;
+        }
 
-        const planKey = offerPlan?.value || 'enterprise';
-        const acct = ACCOUNTS[planKey];
-
-        const users = Math.max(1, Math.floor(Number(offerUsers?.value) || acct.includesUsers));
-        const files = acct.apiAvailable ? Math.max(0, Math.floor(Number(offerFiles?.value) || 0)) : 0;
+        syncOfferSimulationStateFromDOM();
+        const simulations = offerSimulationState.map(normalizeOfferSimulation);
+        const simulationsForPayload = simulations.map(sim => ({
+          ...sim,
+          productKey: sim.planKey === 'perFolder' ? 'perSent' : sim.planKey,
+        }));
+        const signer = getSignerInfo();
+        if (!signer.name || !signer.email) {
+          alert(t[LANG].enterCreator);
+          (offerSignerName || offerSigner)?.focus();
+          return;
+        }
 
         const today = new Date();
         const validUntil = addMonthsSafe(today, 3);
 
-        const simulationBlock = buildOfferSimulationBlock(planKey, files, users);
+        const simulationBlocks = simulations.map((sim, index) =>
+          buildOfferSimulationBlock(sim.planKey, sim.files, sim.users, index + 1, simulations.length)
+        );
 
-// ✅ NEW: "Tel que discuté" block (depends on plan + API + offer language)
-const discussedBlock = buildDiscussAsDiscussedBlock(planKey, files);
+        const discussedBlocks = simulations.map(sim =>
+          buildDiscussAsDiscussedBlock(sim.planKey, sim.files, sim.users, sim.features)
+        );
 
 const payload = {
   companyName,
+  creatorName: signer.name,
+  creatorEmail: signer.email,
   date: formatDateOffer(today),
   validUntil: formatDateOffer(validUntil),
-  simulationBlock,
-  discussedBlock,      // ✅ NEW: sent to Python
+  simulationBlock: simulationBlocks.join('\n\n'),
+  simulationBlocks,
+  simulations: simulationsForPayload,
+  discussedBlock: '',
+  discussedBlocks,
+  outputFormats,
   offerLang: OFFER_LANG,
 };
 
 
         offerGenerateBtn.disabled = true;
-        offerGenerateBtn.textContent = LANG === 'fr' ? 'Génération en cours...' : 'Generating...';
+        offerGenerateBtn.textContent = t[LANG].generatingOffer;
 
         try {
           const res = await fetch('https://micro-mobility-rank-kruger.trycloudflare.com/generate', {
@@ -1196,7 +1971,7 @@ const payload = {
 
               if (!res.ok) {
               const txt = await res.text();
-              alert((LANG === 'fr' ? 'Erreur génération, ' : 'Generation error, ') + txt);
+              alert(t[LANG].generationError + txt);
               return;
             }
             
@@ -1222,13 +1997,10 @@ const payload = {
                       
 
         } catch (e) {
-          alert(LANG === 'fr'
-            ? 'Impossible de joindre le serveur Python. Vérifie que server.py est lancé sur 127.0.0.1:5055.'
-            : 'Cannot reach the Python server. Make sure server.py is running on 127.0.0.1:5055.'
-          );
+          alert(t[LANG].generationServerError);
         } finally {
           offerGenerateBtn.disabled = false;
-          offerGenerateBtn.textContent = LANG === 'fr' ? 'Générer Word + PDF' : 'Generate Word + PDF';
+          refreshOfferGenerateButtonLabel();
         }
       });
     }
@@ -1271,7 +2043,7 @@ const payload = {
       pricingTitle.textContent = t[LANG].infoTitle;
 
       const visible = getVisiblePlans();
-      const order = ['basic', 'pro', 'enterprise'];
+      const order = ['basic', 'pro', 'enterprise', 'perFolder'];
       let html = '';
 
       if (visible.includes('enterprise')) {
@@ -1319,8 +2091,12 @@ const payload = {
           </table>`;
       }
 
+      if (visible.includes('perFolder')) {
+        html += folderTableHTML();
+      }
+
       for (const key of order) {
-        if (visible.includes(key)) html += userTableFor(ACCOUNTS[key]);
+        if (visible.includes(key) && key !== 'perFolder') html += userTableFor(ACCOUNTS[key]);
       }
 
       html += `

@@ -70,7 +70,7 @@
       </div>
 
       <div class="field">
-  <label for="offerCompanyName">Nom de la compagnie</label>
+  <label id="offerCompanyLabel" for="offerCompanyName">Nom de la compagnie</label>
 
   <div class="companyRow">
     <input id="offerCompanyName" type="text" placeholder="Ex, MRC de L’Érable" autocomplete="organization" />
@@ -83,34 +83,77 @@
 </div>
 
 
-        <div class="controls offer-controls">
+        <div class="field" style="margin-top:12px">
+          <label id="offerSignerLabel" for="offerSigner">Créée par</label>
+          <select id="offerSigner">
+            <option value="christopher">Christopher Lord, christopher.lord@ezsign.ca</option>
+            <option value="marie-eve">Marie-Ève Gauvin Rondeau, marie-eve.rondeau@ezsign.ca</option>
+            <option value="meher">Meher Nalbandian, meher.nalbandian@ezsign.ca</option>
+            <option value="other">Autre</option>
+          </select>
+        </div>
+
+        <div id="offerSignerOtherFields" class="controls offer-other-fields" style="display:none">
           <div class="field">
-            <label for="offerPlan">Type de compte</label>
-            <select id="offerPlan">
-              <option value="enterprise">Entreprise</option>
-              <option value="basic">Business Basic</option>
-              <option value="pro">Business Pro</option>
-            </select>
+            <label id="offerSignerNameLabel" for="offerSignerName">Nom</label>
+            <input id="offerSignerName" type="text" autocomplete="name" />
           </div>
-
-          <div class="field" id="offerFilesField">
-            <label for="offerFiles">Nombre d’API</label>
-            <input id="offerFiles" type="number" min="0" inputmode="numeric" placeholder="Ex, 350" value="0" />
-          </div>
-
           <div class="field">
-            <label for="offerUsers">Nombre d’utilisateurs</label>
-            <input id="offerUsers" type="number" min="1" inputmode="numeric" placeholder="Ex, 11" value="10" />
+            <label id="offerSignerEmailLabel" for="offerSignerEmail">Courriel</label>
+            <input id="offerSignerEmail" type="email" autocomplete="email" />
           </div>
+        </div>
 
+        <div id="offerSimulations" class="offer-simulations"></div>
+
+        <div class="output-options" role="group" aria-label="Formats à générer">
+          <label class="feature-option">
+            <input id="outputWordCheck" type="checkbox" checked />
+            <span id="outputWordLabel">Word</span>
+          </label>
+          <label class="feature-option">
+            <input id="outputPdfCheck" type="checkbox" checked />
+            <span id="outputPdfLabel">PDF</span>
+          </label>
+        </div>
+
+        <div class="offer-actions">
+          <button id="addSimulationBtn" type="button" class="chip btn-ghost">+ Ajouter une simulation</button>
           <button id="offerGenerateBtn" class="btn">Générer Word + PDF</button>
         </div>
 
         <div class="note" id="offerDatesNote"></div>
 
         <div class="field" style="margin-top:12px">
-          <label for="offerPreview">Aperçu, section SIMULATION</label>
+          <label id="offerPreviewLabel" for="offerPreview">Aperçu, section SIMULATION</label>
           <textarea id="offerPreview" rows="10" readonly></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="featureModal" class="modal feature-modal" aria-hidden="true">
+    <div class="backdrop" data-close></div>
+    <div class="dialog feature-dialog" role="dialog" aria-modal="true">
+      <div class="head">
+        <h3 id="featureModalTitle">Fonctionnalités discutées</h3>
+        <button class="close-x" data-close>&times;</button>
+      </div>
+      <div class="body">
+        <p id="featureModalIntro" class="muted"></p>
+        <div id="featureChecklist" class="feature-checklist"></div>
+
+        <div class="feature-other">
+          <label class="feature-option">
+            <input id="featureOtherCheck" type="checkbox" />
+            <span id="featureOtherLabel">Autre</span>
+          </label>
+          <textarea id="featureOtherText" rows="3"></textarea>
+        </div>
+
+        <div class="feature-modal-actions">
+          <button id="featureDefaultsBtn" type="button" class="chip btn-ghost">Suggestions par défaut</button>
+          <button id="featureSaveBtn" type="button" class="btn">Appliquer</button>
         </div>
       </div>
     </div>
