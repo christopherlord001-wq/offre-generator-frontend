@@ -1420,9 +1420,10 @@ function defaultFeatureIds(sim) {
   if (hasUserPricing(acct) && users > acct.includesUsers) add('dynamic_extra_users');
 
   if (sim.planKey === 'basic') {
-    ['basic_manual_documents', 'basic_signatures', 'basic_templates', 'basic_two_factor', 'basic_signed_documents_email'].forEach(add);
+    if (users <= acct.includesUsers) add('basic_users_included');
+    ['basic_manual_documents', 'basic_templates', 'basic_two_factor', 'basic_signed_documents_email'].forEach(add);
   } else if (sim.planKey === 'pro') {
-    ['pro_email_branding', 'pro_pdf_converter', 'pro_billing_entities', 'pro_signer_delegation', 'pro_field_dependencies', 'basic_templates'].forEach(add);
+    ['pro_email_branding', 'pro_pdf_converter', 'pro_template_name_recognition', 'pro_signer_delegation', 'pro_field_dependencies'].forEach(add);
   } else if (sim.planKey === 'perFolder') {
     ['per_sent_unlimited_users', 'per_sent_manual_api_billing', 'per_sent_fixed_fee', 'pro_billing_entities', 'pro_email_branding'].forEach(add);
   } else {
@@ -1432,7 +1433,7 @@ function defaultFeatureIds(sim) {
       add('enterprise_bulk_sending');
       add('dynamic_api_usage');
     }
-    ['enterprise_sso', 'enterprise_interface_branding', 'pro_billing_entities', 'pro_email_branding', 'pro_pdf_converter'].forEach(add);
+    ['enterprise_sso', 'enterprise_text_zone_recognition', 'pro_email_branding', 'pro_pdf_converter', 'pro_template_name_recognition'].forEach(add);
   }
 
   return ids.slice(0, 5);
@@ -1802,6 +1803,300 @@ function setOfferLang(lang){
       URL.revokeObjectURL(url);
     }
 
+    function cubicPoint(t, p0, p1, p2, p3) {
+      const u = 1 - t;
+      return {
+        x: (u ** 3 * p0.x) + (3 * u ** 2 * t * p1.x) + (3 * u * t ** 2 * p2.x) + (t ** 3 * p3.x),
+        y: (u ** 3 * p0.y) + (3 * u ** 2 * t * p1.y) + (3 * u * t ** 2 * p2.y) + (t ** 3 * p3.y),
+      };
+    }
+
+    function downloadFlightProfile(outputFormats) {
+      const wantsWord = Boolean(outputFormats?.word);
+      const wantsPdf = Boolean(outputFormats?.pdf);
+      if (wantsWord && !wantsPdf) {
+        return {
+          key: 'word',
+          fallbackMs: 3000,
+          minMs: 2200,
+          maxMs: 5200,
+          finishMinMs: 1200,
+          finishMaxMs: 2300,
+          loopXFactor: 0.28,
+          loopXMax: 420,
+          loopYFactor: 0.17,
+          loopYMin: 105,
+          loopYMax: 165,
+          elbowLift: 126,
+        };
+      }
+      if (!wantsWord && wantsPdf) {
+        return {
+          key: 'pdf',
+          fallbackMs: 10500,
+          minMs: 7200,
+          maxMs: 18000,
+          finishMinMs: 900,
+          finishMaxMs: 3600,
+          loopXFactor: 0.5,
+          loopXMax: 800,
+          loopYFactor: 0.32,
+          loopYMin: 190,
+          loopYMax: 315,
+          elbowLift: 170,
+        };
+      }
+      return {
+        key: 'word_pdf',
+        fallbackMs: 11800,
+        minMs: 8500,
+        maxMs: 18000,
+        finishMinMs: 900,
+        finishMaxMs: 3800,
+        loopXFactor: 0.48,
+        loopXMax: 760,
+        loopYFactor: 0.3,
+        loopYMin: 185,
+        loopYMax: 300,
+        elbowLift: 165,
+      };
+    }
+
+    function downloadFlightDuration(profile) {
+      const saved = Number(localStorage.getItem(`ez_download_flight_ms_${profile.key}`) || 0);
+      const estimate = Number.isFinite(saved) && saved > 0 ? saved : profile.fallbackMs;
+      return Math.min(profile.maxMs, Math.max(profile.minMs, estimate));
+    }
+
+    function rememberDownloadFlightDuration(elapsedMs, profile) {
+      if (!Number.isFinite(elapsedMs) || elapsedMs <= 0) return;
+      const key = `ez_download_flight_ms_${profile.key}`;
+      const previous = Number(localStorage.getItem(key) || profile.fallbackMs);
+      const next = Math.round((previous * 0.55) + (elapsedMs * 0.45));
+      localStorage.setItem(key, String(Math.min(profile.maxMs, Math.max(profile.minMs, next))));
+    }
+
+    function startDownloadFlight(button, outputFormats) {
+      if (!button || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return { stop: async () => {} };
+      }
+
+      const rect = button.getBoundingClientRect();
+      const layer = document.createElement('div');
+      layer.className = 'download-flight-layer';
+
+      const token = document.createElement('div');
+      token.className = 'download-flight-token';
+      token.textContent = 'EZ';
+      layer.appendChild(token);
+      document.body.appendChild(layer);
+
+      const profile = downloadFlightProfile(outputFormats);
+      const start = { x: rect.right + 20, y: rect.top + rect.height / 2 };
+      const end = { x: Math.max(56, window.innerWidth - 178), y: 8 };
+      const loop = {
+        x: Math.max(80, rect.left - Math.min(profile.loopXMax, window.innerWidth * profile.loopXFactor)),
+        y: Math.min(window.innerHeight - 42, rect.bottom + Math.min(profile.loopYMax, Math.max(profile.loopYMin, window.innerHeight * profile.loopYFactor))),
+      };
+      const elbow = {
+        x: Math.min(window.innerWidth - 260, rect.right + (profile.key === 'word' ? 82 : 120)),
+        y: Math.max(96, rect.top - profile.elbowLift),
+      };
+      const duration = downloadFlightDuration(profile);
+      let raf = null;
+      let startedAt = performance.now();
+      let lastParticleAt = 0;
+      let current = start;
+      let currentRawProgress = 0;
+      let stopped = false;
+
+      const ease = value => 0.5 - Math.cos(value * Math.PI) / 2;
+      const easeOutCubic = value => 1 - ((1 - value) ** 3);
+      const easeInCubic = value => value ** 3;
+
+      function moveTo(point) {
+        current = point;
+        token.style.left = `${point.x}px`;
+        token.style.top = `${point.y}px`;
+      }
+
+      function flightPace(rawT) {
+        const t = Math.min(1, Math.max(0, rawT));
+        if (t < 0.16) return 0.28 * easeOutCubic(t / 0.16);
+        if (t < 0.78) return 0.28 + (0.5 * ease((t - 0.16) / 0.62));
+        return 0.78 + (0.22 * easeInCubic((t - 0.78) / 0.22));
+      }
+
+      function pointOnFlight(rawT) {
+        const t = Math.min(1, Math.max(0, rawT));
+        if (t < 0.55) {
+          const s = ease(t / 0.55);
+          return cubicPoint(
+            s,
+            start,
+            { x: start.x + 150, y: start.y + 28 },
+            { x: loop.x + 210, y: loop.y + 125 },
+            loop
+          );
+        }
+        if (t < 0.84) {
+          const s = ease((t - 0.55) / 0.29);
+          return cubicPoint(
+            s,
+            loop,
+            { x: loop.x + 310, y: loop.y - 50 },
+            { x: elbow.x - 230, y: elbow.y + 125 },
+            elbow
+          );
+        }
+        const s = ease((t - 0.84) / 0.16);
+        return cubicPoint(
+          s,
+          elbow,
+          { x: elbow.x + 175, y: elbow.y - 44 },
+          { x: end.x - 24, y: end.y + 92 },
+          end
+        );
+      }
+
+      function spawnParticle(point) {
+        const particle = document.createElement('span');
+        particle.className = 'download-flight-particle';
+        const driftX = (Math.random() - 0.5) * 26;
+        const driftY = (Math.random() - 0.5) * 20;
+        particle.style.left = `${point.x + driftX}px`;
+        particle.style.top = `${point.y + driftY}px`;
+        particle.style.setProperty('--particle-x', `${-18 - Math.random() * 22}px`);
+        particle.style.setProperty('--particle-y', `${8 + Math.random() * 16}px`);
+        layer.appendChild(particle);
+        window.setTimeout(() => particle.remove(), 980);
+      }
+
+      function spawnBurst(origin, count, distance = 96, extraClass = '') {
+        for (let i = 0; i < count; i += 1) {
+          const particle = document.createElement('span');
+          particle.className = `download-flight-particle is-burst${extraClass ? ` ${extraClass}` : ''}`;
+          const angle = Math.random() * Math.PI * 2;
+          const travel = distance * (0.45 + Math.random() * 0.75);
+          const size = 4 + Math.random() * 7;
+          particle.style.left = `${origin.x}px`;
+          particle.style.top = `${origin.y}px`;
+          particle.style.setProperty('--particle-size', `${size}px`);
+          particle.style.setProperty('--particle-x', `${Math.cos(angle) * travel}px`);
+          particle.style.setProperty('--particle-y', `${Math.sin(angle) * travel}px`);
+          layer.appendChild(particle);
+          window.setTimeout(() => particle.remove(), 1050);
+        }
+      }
+
+      function explodeButton() {
+        const freshRect = button.getBoundingClientRect();
+        const origin = {
+          x: freshRect.left + freshRect.width / 2,
+          y: freshRect.top + freshRect.height / 2,
+        };
+        button.classList.add('is-exploding');
+        window.setTimeout(() => button.classList.remove('is-exploding'), 520);
+
+        const ring = document.createElement('span');
+        ring.className = 'download-button-burst-ring';
+        ring.style.left = `${origin.x}px`;
+        ring.style.top = `${origin.y}px`;
+        ring.style.width = `${freshRect.width}px`;
+        ring.style.height = `${freshRect.height}px`;
+        layer.appendChild(ring);
+        window.setTimeout(() => ring.remove(), 760);
+
+        spawnBurst(origin, 58, 145, 'from-button');
+      }
+
+      function frame(now) {
+        if (stopped) return;
+        const elapsed = now - startedAt;
+        const progress = Math.min(1, elapsed / duration);
+        currentRawProgress = progress;
+        const point = pointOnFlight(flightPace(progress));
+        moveTo(point);
+
+        if (progress < 1 && now - lastParticleAt > 58) {
+          lastParticleAt = now;
+          spawnParticle(point);
+        }
+
+        if (progress >= 1) {
+          token.classList.add('is-waiting');
+          return;
+        }
+
+        raf = requestAnimationFrame(frame);
+      }
+
+      function animateRemainingFlight(fromRawProgress, toRawProgress, animationMs) {
+        return new Promise(resolve => {
+          const startTime = performance.now();
+          let finishRaf = null;
+
+          function step(now) {
+            const elapsed = now - startTime;
+            const localT = Math.min(1, elapsed / animationMs);
+            const rawProgress = fromRawProgress + ((toRawProgress - fromRawProgress) * ease(localT));
+            currentRawProgress = rawProgress;
+            moveTo(pointOnFlight(flightPace(rawProgress)));
+
+            if (now - lastParticleAt > 58 && rawProgress < 1) {
+              lastParticleAt = now;
+              spawnParticle(current);
+            }
+
+            if (localT >= 1) {
+              if (finishRaf) cancelAnimationFrame(finishRaf);
+              resolve();
+              return;
+            }
+
+            finishRaf = requestAnimationFrame(step);
+          }
+
+          finishRaf = requestAnimationFrame(step);
+        });
+      }
+
+      moveTo(start);
+      raf = requestAnimationFrame(frame);
+
+      return {
+        async stop({ explode = true } = {}) {
+          if (stopped) return;
+          stopped = true;
+          if (raf) cancelAnimationFrame(raf);
+          rememberDownloadFlightDuration(performance.now() - startedAt, profile);
+
+          const progress = Math.min(1, Math.max(currentRawProgress, (performance.now() - startedAt) / duration));
+          const finishDuration = progress >= 0.98
+            ? 280
+            : Math.min(profile.finishMaxMs, Math.max(profile.finishMinMs, (1 - progress) * duration * 0.55));
+          token.classList.remove('is-waiting');
+          token.classList.add('is-finishing');
+
+          if (progress < 1) await animateRemainingFlight(progress, 1, finishDuration);
+
+          moveTo(end);
+          spawnBurst(end, 16, 54);
+          if (explode) explodeButton();
+
+          await token.animate(
+            [
+              { opacity: 1, transform: 'translate(-50%, -50%) scale(1.08)' },
+              { opacity: 0, transform: 'translate(-50%, -50%) scale(.55)' },
+            ],
+            { duration: 520, easing: 'ease-out', fill: 'forwards' }
+          ).finished;
+
+          window.setTimeout(() => layer.remove(), 320);
+        },
+      };
+    }
+
     /* =============================================================================
        10) THEME, LANG, EVENTS, BOOTSTRAP
        ============================================================================= */
@@ -1961,6 +2256,10 @@ const payload = {
 
         offerGenerateBtn.disabled = true;
         offerGenerateBtn.textContent = t[LANG].generatingOffer;
+        const downloadFlight = startDownloadFlight(offerGenerateBtn, outputFormats);
+        let downloadReady = false;
+        let downloadBlob = null;
+        let downloadFilename = 'Offer.docx';
 
         try {
           const res = await fetch('https://micro-mobility-rank-kruger.trycloudflare.com/generate', {
@@ -1976,29 +2275,24 @@ const payload = {
             }
             
             // ✅ Le serveur renvoie maintenant un fichier (docx/pdf), pas du JSON
-            const blob = await res.blob();
-            const url = window.URL.createObjectURL(blob);
+            downloadBlob = await res.blob();
             
             // Nom de fichier depuis le header (si présent)
-            let filename = 'Offer.docx';
             const dispo = res.headers.get('content-disposition');
             if (dispo && dispo.includes('filename=')) {
-              filename = dispo.split('filename=')[1].replace(/"/g, '').trim();
+              downloadFilename = dispo.split('filename=')[1].replace(/"/g, '').trim();
             }
             
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            
-            window.URL.revokeObjectURL(url);
+            downloadReady = true;
                       
 
         } catch (e) {
           alert(t[LANG].generationServerError);
         } finally {
+          await downloadFlight.stop({ explode: downloadReady });
+          if (downloadReady && downloadBlob) {
+            await downloadBlobAsFile(downloadBlob, downloadFilename);
+          }
           offerGenerateBtn.disabled = false;
           refreshOfferGenerateButtonLabel();
         }

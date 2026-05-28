@@ -347,3 +347,89 @@ html[data-theme="dark"] .feature-other textarea{
   .offer-sim-head{align-items:flex-start}
   .feature-modal-actions{display:grid}
 }
+
+.download-flight-layer{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+  z-index:9999;
+}
+.download-flight-token{
+  position:absolute;
+  width:34px;
+  height:34px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:var(--brand-primary);
+  color:#fff;
+  font-weight:900;
+  font-size:13px;
+  letter-spacing:0;
+  box-shadow:0 8px 20px rgba(214,40,57,.35);
+  transform:translate(-50%,-50%);
+  will-change:left,top,transform,opacity;
+}
+.download-flight-token::after{
+  content:"";
+  position:absolute;
+  inset:-5px;
+  border:1px solid rgba(230,57,70,.25);
+  border-radius:50%;
+}
+.download-flight-token.is-waiting{
+  animation:downloadTokenWait 1.15s ease-in-out infinite;
+}
+.download-flight-particle{
+  position:absolute;
+  width:var(--particle-size,7px);
+  height:var(--particle-size,7px);
+  border-radius:50%;
+  background:var(--particle-color,var(--brand-primary));
+  box-shadow:0 0 12px rgba(230,57,70,.45);
+  transform:translate(-50%,-50%);
+  animation:downloadParticleFade .95s ease-out forwards;
+  will-change:transform,opacity;
+}
+.download-flight-particle.is-burst{
+  animation-duration:.82s;
+}
+.download-flight-particle.from-button:nth-child(3n){
+  --particle-color:#ff5b68;
+}
+.download-flight-particle.from-button:nth-child(3n + 1){
+  --particle-color:#d62839;
+}
+.btn.is-exploding{
+  animation:downloadButtonPop .52s cubic-bezier(.2,.9,.2,1);
+}
+.download-button-burst-ring{
+  position:absolute;
+  border:2px solid rgba(230,57,70,.72);
+  border-radius:12px;
+  transform:translate(-50%,-50%) scale(.82);
+  animation:downloadButtonBurstRing .72s ease-out forwards;
+  box-shadow:0 0 0 1px rgba(255,255,255,.45) inset;
+}
+@keyframes downloadTokenWait{
+  0%,100%{transform:translate(-50%,-50%) scale(1)}
+  50%{transform:translate(-50%,-50%) scale(1.12)}
+}
+@keyframes downloadParticleFade{
+  0%{opacity:.85;transform:translate(-50%,-50%) scale(1)}
+  100%{opacity:0;transform:translate(calc(-50% + var(--particle-x, -24px)),calc(-50% + var(--particle-y, 12px))) scale(.25)}
+}
+@keyframes downloadButtonPop{
+  0%{transform:scale(1);filter:brightness(1)}
+  35%{transform:scale(.96);filter:brightness(1.05)}
+  58%{transform:scale(1.05);filter:brightness(1.12)}
+  100%{transform:scale(1);filter:brightness(1)}
+}
+@keyframes downloadButtonBurstRing{
+  0%{opacity:.9;transform:translate(-50%,-50%) scale(.82)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(1.55)}
+}
+@media (prefers-reduced-motion: reduce){
+  .download-flight-layer{display:none}
+}
