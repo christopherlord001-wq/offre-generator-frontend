@@ -1877,16 +1877,16 @@ function setOfferLang(lang){
     }
 
     function startDownloadFlight(button, outputFormats) {
-      if (!button || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      if (!button) {
         return { stop: async () => {} };
       }
 
       const rect = button.getBoundingClientRect();
       const layer = document.createElement('div');
-      layer.className = 'download-flight-layer';
+      layer.className = 'ez-flight-layer';
 
       const token = document.createElement('div');
-      token.className = 'download-flight-token';
+      token.className = 'ez-flight-token';
       token.textContent = 'EZ';
       layer.appendChild(token);
       document.body.appendChild(layer);
@@ -1961,7 +1961,7 @@ function setOfferLang(lang){
 
       function spawnParticle(point) {
         const particle = document.createElement('span');
-        particle.className = 'download-flight-particle';
+        particle.className = 'ez-flight-particle';
         const driftX = (Math.random() - 0.5) * 26;
         const driftY = (Math.random() - 0.5) * 20;
         particle.style.left = `${point.x + driftX}px`;
@@ -1975,7 +1975,7 @@ function setOfferLang(lang){
       function spawnBurst(origin, count, distance = 96, extraClass = '') {
         for (let i = 0; i < count; i += 1) {
           const particle = document.createElement('span');
-          particle.className = `download-flight-particle is-burst${extraClass ? ` ${extraClass}` : ''}`;
+          particle.className = `ez-flight-particle is-burst${extraClass ? ` ${extraClass}` : ''}`;
           const angle = Math.random() * Math.PI * 2;
           const travel = distance * (0.45 + Math.random() * 0.75);
           const size = 4 + Math.random() * 7;
@@ -1999,7 +1999,7 @@ function setOfferLang(lang){
         window.setTimeout(() => button.classList.remove('is-exploding'), 520);
 
         const ring = document.createElement('span');
-        ring.className = 'download-button-burst-ring';
+        ring.className = 'ez-button-burst-ring';
         ring.style.left = `${origin.x}px`;
         ring.style.top = `${origin.y}px`;
         ring.style.width = `${freshRect.width}px`;
