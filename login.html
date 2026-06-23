@@ -11,7 +11,7 @@
     <section class="login-card">
       <div class="login-brand">ez</div>
       <h1>Connexion</h1>
-      <form id="loginForm" class="login-form">
+      <form id="loginForm" class="login-form" method="post" action="/api/auth/login">
         <label>
           Email
           <input id="loginEmail" type="email" autocomplete="username" required />
@@ -27,9 +27,12 @@
   </main>
   <script src="config.js?v=1.0"></script>
   <script>
-    const CONFIG_API_BASE = String(window.EZSIGN_CONFIG?.apiBaseUrl || '').replace(/\/+$/, '');
-    const AUTH_BASE = window.location.protocol === 'file:' ? 'http://127.0.0.1:5055' : CONFIG_API_BASE;
+    const CONFIG_API_BASE = String(window.EZSIGN_CONFIG?.apiBaseUrl || '').trim().replace(/\/+$/, '');
+    const IS_FILE = window.location.protocol === 'file:';
+    const IS_GITHUB_PAGES = window.location.hostname.endsWith('github.io');
+    const AUTH_BASE = IS_FILE ? 'http://127.0.0.1:5055' : (IS_GITHUB_PAGES ? CONFIG_API_BASE : '');
     const AUTH_CREDENTIALS = AUTH_BASE ? 'include' : 'same-origin';
+    const APP_URL = IS_FILE ? `${AUTH_BASE}/` : (IS_GITHUB_PAGES ? (AUTH_BASE ? `${AUTH_BASE}/` : './') : '/');
     const form = document.getElementById('loginForm');
     const errorEl = document.getElementById('loginError');
     const button = document.getElementById('loginSubmit');
@@ -50,7 +53,7 @@
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || 'Connexion impossible.');
-        window.location.href = `${AUTH_BASE}/`;
+        window.location.href = APP_URL;
       } catch (error) {
         errorEl.textContent = error.message;
       } finally {
