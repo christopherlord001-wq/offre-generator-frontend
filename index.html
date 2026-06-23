@@ -9,11 +9,11 @@
   <title>Calculateur eZsign</title>
 
   <!-- Link to the stylesheet (same folder) -->
-  <link rel="stylesheet" href="style.css?v=2.3" />
+  <link rel="stylesheet" href="style.css?v=2.7" />
 </head>
 <body>
   <div class="appbar">
-    <img src="./logo-ezsign.png" alt="eZsign" onerror="this.style.display='none'">
+    <span class="appbar-ez-mark" aria-label="eZsign">ez</span>
     <div id="title" class="app-title">Calculateur eZsign</div>
 
     <button id="infoBtn" class="icon-btn" title="Tarifs">i</button>
@@ -21,6 +21,8 @@
 
     <!-- NEW, Offer of service -->
     <button id="offerBtn" class="chip">Offre de service</button>
+    <button id="meetingAiBtn" class="chip meeting-ai-top">Analyse IA</button>
+    <button id="settingsBtn" class="chip">Settings</button>
 
     <button id="themeBtn" class="chip">Thème clair</button>
     <button id="langBtn" class="lang-btn">EN</button>
@@ -132,6 +134,77 @@
     </div>
   </div>
 
+  <div id="meetingAiModal" class="modal meeting-ai-modal" aria-hidden="true">
+    <div class="backdrop" data-close></div>
+    <div class="dialog meeting-ai-dialog" role="dialog" aria-modal="true">
+      <div class="head">
+        <h3>Analyse IA des rencontres</h3>
+        <button class="close-x" data-close>&times;</button>
+      </div>
+      <div class="body meeting-ai-body">
+        <section class="meeting-ai-panel meeting-ai-form-panel">
+          <div class="meeting-ai-status" id="meetingAiStatus">Vérification Ollama...</div>
+
+          <div class="meeting-ai-grid">
+            <div class="field">
+              <label for="meetingClientName">Client</label>
+              <input id="meetingClientName" type="text" placeholder="Ex. Coopérative d’habitation des Cantons de l’Est" autocomplete="organization" />
+            </div>
+            <div class="field">
+              <label for="meetingDate">Date</label>
+              <input id="meetingDate" type="date" />
+            </div>
+            <div class="field">
+              <label for="meetingReference">Référence</label>
+              <input id="meetingReference" type="text" placeholder="Ex. Référé par Hopem" />
+            </div>
+            <div class="field">
+              <label for="meetingSalesRep">Représentant</label>
+              <input id="meetingSalesRep" type="text" placeholder="Nom du sales" autocomplete="name" />
+            </div>
+            <div class="field">
+              <label for="meetingType">Type</label>
+              <select id="meetingType">
+                <option value="Démo / discovery">Démo / discovery</option>
+                <option value="Suivi">Suivi</option>
+                <option value="Renouvellement">Renouvellement</option>
+                <option value="Closing">Closing</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field meeting-transcript-field">
+            <label for="meetingTranscript">Transcript</label>
+            <textarea id="meetingTranscript" rows="14" placeholder="Colle le transcript complet de la rencontre ici..."></textarea>
+          </div>
+
+          <div class="meeting-ai-actions">
+            <button id="meetingAnalyzeBtn" class="btn" type="button">Analyser la rencontre</button>
+            <button id="meetingClearBtn" class="chip btn-ghost" type="button">Effacer</button>
+          </div>
+        </section>
+
+        <section class="meeting-ai-panel meeting-ai-results-panel">
+          <div class="meeting-ai-results-head">
+            <h4>Résultat</h4>
+            <span id="meetingAiMeta" class="muted"></span>
+          </div>
+          <div id="meetingAiResult" class="meeting-ai-result empty-state">
+            Colle un transcript et lance l’analyse.
+          </div>
+        </section>
+
+        <aside class="meeting-ai-panel meeting-ai-history-panel">
+          <div class="meeting-ai-results-head">
+            <h4>Mémoire</h4>
+          </div>
+          <div id="meetingAiMemory" class="meeting-ai-memory muted"></div>
+          <div id="meetingAiHistory" class="meeting-ai-history"></div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
   <div id="featureModal" class="modal feature-modal" aria-hidden="true">
     <div class="backdrop" data-close></div>
     <div class="dialog feature-dialog" role="dialog" aria-modal="true">
@@ -159,7 +232,9 @@
     </div>
   </div>
 
-  <script src="./app.js?v=2.3"></script>
+  <script src="./auth.js?v=1.1"></script>
+  <script src="./app.js?v=2.5"></script>
+  <script src="./meeting-ai.js?v=1.5"></script>
 </body>
 </html>
 

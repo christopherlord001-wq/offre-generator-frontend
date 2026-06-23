@@ -2262,9 +2262,16 @@ const payload = {
         let downloadFilename = 'Offer.docx';
 
         try {
-          const res = await fetch('https://micro-mobility-rank-kruger.trycloudflare.com/generate', {
+          if (window.ezAuth?.ready) await window.ezAuth.ready;
+          const generateUrl = window.location.protocol === 'file:' ? 'http://127.0.0.1:5055/generate' : '/generate';
+          const generateCredentials = window.location.protocol === 'file:' ? 'include' : 'same-origin';
+          const res = await fetch(generateUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            credentials: generateCredentials,
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': window.ezAuth?.csrfToken || '',
+            },
             body: JSON.stringify(payload),
           });
 

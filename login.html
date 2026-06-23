@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Connexion eZsign</title>
+  <link rel="stylesheet" href="style.css?v=2.6" />
+</head>
+<body class="login-page">
+  <main class="login-shell">
+    <section class="login-card">
+      <div class="login-brand">ez</div>
+      <h1>Connexion</h1>
+      <form id="loginForm" class="login-form">
+        <label>
+          Email
+          <input id="loginEmail" type="email" autocomplete="username" required />
+        </label>
+        <label>
+          Mot de passe
+          <input id="loginPassword" type="password" autocomplete="current-password" required />
+        </label>
+        <button id="loginSubmit" class="btn" type="submit">Se connecter</button>
+        <p id="loginError" class="login-error" role="alert"></p>
+      </form>
+    </section>
+  </main>
+  <script>
+    const AUTH_BASE = window.location.protocol === 'file:' ? 'http://127.0.0.1:5055' : '';
+    const AUTH_CREDENTIALS = AUTH_BASE ? 'include' : 'same-origin';
+    const form = document.getElementById('loginForm');
+    const errorEl = document.getElementById('loginError');
+    const button = document.getElementById('loginSubmit');
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      errorEl.textContent = '';
+      button.disabled = true;
+      button.textContent = 'Connexion...';
+      try {
+        const res = await fetch(`${AUTH_BASE}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: AUTH_CREDENTIALS,
+          body: JSON.stringify({
+            email: document.getElementById('loginEmail').value,
+            password: document.getElementById('loginPassword').value,
+          }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Connexion impossible.');
+        window.location.href = `${AUTH_BASE}/`;
+      } catch (error) {
+        errorEl.textContent = error.message;
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Se connecter';
+      }
+    });
+  </script>
+</body>
+</html>
