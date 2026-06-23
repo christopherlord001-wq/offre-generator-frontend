@@ -2263,10 +2263,10 @@ const payload = {
 
         try {
           if (window.ezAuth?.ready) await window.ezAuth.ready;
-          const generateUrl = window.location.protocol === 'file:'
-  ? 'http://127.0.0.1:5055/generate'
-  : 'https://fought-dominant-cats-minimize.trycloudflare.com/generate';
-          const generateCredentials = window.location.protocol === 'file:' ? 'include' : 'same-origin';
+          const configApiBase = String(window.EZSIGN_CONFIG?.apiBaseUrl || '').replace(/\/+$/, '');
+          const generateBase = window.location.protocol === 'file:' ? 'http://127.0.0.1:5055' : configApiBase;
+          const generateUrl = `${generateBase}/generate`;
+          const generateCredentials = generateBase ? 'include' : 'same-origin';
           const res = await fetch(generateUrl, {
             method: 'POST',
             credentials: generateCredentials,
