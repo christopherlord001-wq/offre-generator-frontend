@@ -26,7 +26,9 @@
     </section>
   </main>
   <script>
-    const AUTH_BASE = window.location.protocol === 'file:' ? 'http://127.0.0.1:5055' : '';
+    const AUTH_BASE = window.location.protocol === 'file:'
+  ? 'http://127.0.0.1:5055'
+  : 'https://fought-dominant-cats-minimize.trycloudflare.com';
     const AUTH_CREDENTIALS = AUTH_BASE ? 'include' : 'same-origin';
     const form = document.getElementById('loginForm');
     const errorEl = document.getElementById('loginError');
