@@ -3,7 +3,9 @@
   window.__EZSIGN_MEETING_AI_INIT__ = true;
 
   document.addEventListener('DOMContentLoaded', () => {
-    const API_BASE = window.location.protocol === 'file:' ? 'http://127.0.0.1:5055' : '';
+    const API_BASE = window.location.protocol === 'file:'
+  ? 'http://127.0.0.1:5055'
+  : 'https://fought-dominant-cats-minimize.trycloudflare.com';
     const API_CREDENTIALS = API_BASE ? 'include' : 'same-origin';
     const $ = id => document.getElementById(id);
     const REPS = [
