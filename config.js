@@ -1,5 +1,5 @@
 window.EZSIGN_CONFIG = {
   // Change this single value when Cloudflare gives you a new tunnel URL.
   // Leave empty ("") when the frontend is served directly by the Flask app.
-  apiBaseUrl: "https://secretariat-kings-compatibility-labor.trycloudflare.com",
+  apiBaseUrl: "https://fought-dominant-cats-minimize.trycloudflare.com",
 };

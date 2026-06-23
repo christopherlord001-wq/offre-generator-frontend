@@ -4,6 +4,7 @@
   const CONFIG_API_BASE = String(window.EZSIGN_CONFIG?.apiBaseUrl || '').replace(/\/+$/, '');
   const AUTH_BASE = window.location.protocol === 'file:' ? 'http://127.0.0.1:5055' : CONFIG_API_BASE;
   const AUTH_CREDENTIALS = AUTH_BASE ? 'include' : 'same-origin';
+  const LOGIN_URL = AUTH_BASE ? `${AUTH_BASE}/login` : 'login.html';
 
   const auth = {
     user: null,
@@ -22,7 +23,7 @@
         headers,
       });
       if (res.status === 401) {
-        window.location.href = `${AUTH_BASE}/login`;
+        window.location.href = LOGIN_URL;
         throw new Error('Connexion requise.');
       }
       return res;
@@ -36,9 +37,15 @@
   });
 
   async function loadMe() {
-    const res = await fetch(`${AUTH_BASE}/api/auth/me`, { credentials: AUTH_CREDENTIALS });
+    let res;
+    try {
+      res = await fetch(`${AUTH_BASE}/api/auth/me`, { credentials: AUTH_CREDENTIALS });
+    } catch (error) {
+      window.location.href = LOGIN_URL;
+      throw error;
+    }
     if (res.status === 401) {
-      window.location.href = `${AUTH_BASE}/login`;
+      window.location.href = LOGIN_URL;
       throw new Error('Connexion requise.');
     }
     const data = await res.json();
@@ -139,7 +146,7 @@
 
   async function logout() {
     await auth.fetch('/api/auth/logout', { method: 'POST' });
-    window.location.href = `${AUTH_BASE}/login`;
+    window.location.href = LOGIN_URL;
   }
 
   async function renderAdminUsers() {
