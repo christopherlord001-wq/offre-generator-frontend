@@ -1,7 +1,9 @@
 (() => {
   if (window.__EZSIGN_AUTH_INIT__) return;
   window.__EZSIGN_AUTH_INIT__ = true;
-  const AUTH_BASE = window.location.protocol === 'file:' ? 'http://127.0.0.1:5055' : '';
+  const AUTH_BASE = window.location.protocol === 'file:'
+  ? 'http://127.0.0.1:5055'
+  : 'https://fought-dominant-cats-minimize.trycloudflare.com';
   const AUTH_CREDENTIALS = AUTH_BASE ? 'include' : 'same-origin';
 
   const auth = {
