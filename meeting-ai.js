@@ -3,10 +3,178 @@
   window.__EZSIGN_MEETING_AI_INIT__ = true;
 
   document.addEventListener('DOMContentLoaded', () => {
-    const CONFIG_API_BASE = String(window.EZSIGN_CONFIG?.apiBaseUrl || '').replace(/\/+$/, '');
-    const API_BASE = window.location.protocol === 'file:' ? 'http://127.0.0.1:5055' : CONFIG_API_BASE;
+    const CONFIG_API_BASE = String(window.EZSIGN_CONFIG?.apiBaseUrl || '').trim().replace(/\/+$/, '');
+    const IS_FILE = window.location.protocol === 'file:';
+    const IS_GITHUB_PAGES = window.location.hostname.endsWith('github.io');
+    const API_BASE = IS_FILE ? 'http://127.0.0.1:5055' : (IS_GITHUB_PAGES ? CONFIG_API_BASE : '');
     const API_CREDENTIALS = API_BASE ? 'include' : 'same-origin';
     const $ = id => document.getElementById(id);
+    const T = {
+      fr: {
+        meeting_note: "Note de rencontre",
+        source: "Source",
+        copy_summary: "Copier le résumé",
+        summary_copied: "Résumé copié",
+        view_transcript: "Voir transcript",
+        exec_summary: "Résumé exécutif",
+        improvements: "Améliorations",
+        meeting_score: "Score de rencontre",
+        context: "Contexte",
+        intended_use: "Utilisation prévue",
+        current_process: "Processus actuel",
+        options_considered: "Options envisagées",
+        next_steps: "Prochaines étapes",
+        key_objections: "Objections principales",
+        client_interests: "Points intéressants pour le client",
+        recommendations: "Recommandations",
+        risks: "Risques",
+        next_meetings_registry: "Registre pour les prochaines rencontres",
+        memory_to_reuse: "Mémoire à réutiliser",
+        annualized_value: "Valeur annualisée",
+        insufficient_data: "Données insuffisantes",
+        deal_hotness: "Deal Hotness (Prêt à s'engager)",
+        win_rate: "Probabilité de Close Won (Win Rate)",
+        no_improvements: "Aucune amélioration précise pour l’instant.",
+        unconfirmed: "Non confirmé",
+        no_items: "Aucun élément",
+        client_profile: "Profil client",
+        pain_points: "Pain points",
+        decision_criteria: "Critères de décision",
+        stakeholders: "Parties prenantes",
+        usage_and_volume: "Utilisation / volumes",
+        prospect_source: "Source prospect",
+        follow_up_promises: "Promesses de suivi",
+        meetings_in_memory: "rencontre(s) en mémoire",
+        average_score: "score moyen",
+        frequent_objections: "Objections fréquentes",
+        frequent_interests: "Intérêts fréquents",
+        frequent_sources: "Sources prospect fréquentes",
+        coaching_for: "Coaching",
+        not_enough_meetings: "Pas encore assez de rencontres pour ce représentant.",
+        none_yet: "Aucune encore.",
+        none_yet_m: "Aucun encore.",
+        no_sources_yet: "Aucune source encore.",
+        reset_memory: "Réinitialiser mémoire",
+        avg_prev_month: "Moy. mois précédent",
+        average_prev_month: "Moyenne mois précédent",
+        no_scores_chart: "Aucun score à afficher pour cette vue.",
+        no_meetings_analyzed: "Aucune rencontre analysée encore.",
+        paste_transcript_prompt: "Colle un transcript et lance l’analyse.",
+        local_analysis_running: "Analyse locale en cours avec Ollama. Ça peut prendre quelques secondes.",
+        paste_more_complete: "Colle un transcript plus complet avant de lancer l’analyse.",
+        current_month: "Mois courant",
+        all: "All",
+        unconfirmed_reason: "Type de compte ou nombre d'utilisateurs non confirmé.",
+        excellent: "Excellent",
+        very_good: "Très bon",
+        to_strengthen: "À renforcer",
+        at_risk: "À risque",
+        criteria_discovery: "Découverte des besoins",
+        criteria_qualification: "Qualification de l'utilisation et des volumes",
+        criteria_value: "Clarté de la proposition de valeur",
+        criteria_objections: "Gestion des objections",
+        criteria_engagement: "Engagement du prospect",
+        criteria_next_step: "Prochaine étape claire",
+        transcript_title: "Transcript",
+        speaker: "Intervenant",
+        no_transcript_available: "Aucun transcript disponible.",
+        analyze_btn: "Analyser la rencontre",
+        analyzing_btn: "Analyse en cours...",
+        clear_btn: "Effacer",
+        meeting_label: "Rencontre",
+        coaching_section: "Coaching",
+        representative: "Représentant",
+        reset_code_prompt: "Code requis pour réinitialiser la mémoire",
+        memory_reset_done: "Mémoire réinitialisée. Colle un transcript et lance l’analyse.",
+        client: "Client",
+        reference: "Référence",
+        date: "Date"
+      },
+      en: {
+        meeting_note: "Meeting Note",
+        source: "Source",
+        copy_summary: "Copy Summary",
+        summary_copied: "Summary Copied",
+        view_transcript: "View Transcript",
+        exec_summary: "Executive Summary",
+        improvements: "Improvements",
+        meeting_score: "Meeting Score",
+        context: "Context",
+        intended_use: "Intended Use",
+        current_process: "Current Process",
+        options_considered: "Options Considered",
+        next_steps: "Next Steps",
+        key_objections: "Key Objections",
+        client_interests: "Client Interests",
+        recommendations: "Recommendations",
+        risks: "Risks",
+        next_meetings_registry: "Registry for Next Meetings",
+        memory_to_reuse: "Memory to Reuse",
+        annualized_value: "Annualized Value",
+        insufficient_data: "Insufficient Data",
+        deal_hotness: "Deal Hotness (Ready to commit)",
+        win_rate: "Probability of Close Won (Win Rate)",
+        no_improvements: "No specific improvements for now.",
+        unconfirmed: "Unconfirmed",
+        no_items: "No items",
+        client_profile: "Client Profile",
+        pain_points: "Pain Points",
+        decision_criteria: "Decision Criteria",
+        stakeholders: "Stakeholders",
+        usage_and_volume: "Usage & Volumes",
+        prospect_source: "Prospect Source",
+        follow_up_promises: "Follow-up Promises",
+        meetings_in_memory: "meeting(s) in memory",
+        average_score: "average score",
+        frequent_objections: "Frequent Objections",
+        frequent_interests: "Frequent Interests",
+        frequent_sources: "Frequent Prospect Sources",
+        coaching_for: "Coaching",
+        not_enough_meetings: "Not enough meetings for this representative yet.",
+        none_yet: "None yet.",
+        none_yet_m: "None yet.",
+        no_sources_yet: "No sources yet.",
+        reset_memory: "Reset Memory",
+        avg_prev_month: "Avg. previous month",
+        average_prev_month: "Average previous month",
+        no_scores_chart: "No scores to display for this view.",
+        no_meetings_analyzed: "No meetings analyzed yet.",
+        paste_transcript_prompt: "Paste a transcript and start the analysis.",
+        local_analysis_running: "Local analysis in progress with Ollama. This may take a few seconds.",
+        paste_more_complete: "Paste a more complete transcript before starting the analysis.",
+        current_month: "Current Month",
+        all: "All",
+        unconfirmed_reason: "Account type or users count unconfirmed.",
+        excellent: "Excellent",
+        very_good: "Very good",
+        to_strengthen: "To strengthen",
+        at_risk: "At risk",
+        criteria_discovery: "Needs Discovery",
+        criteria_qualification: "Qualification of usage and volumes",
+        criteria_value: "Value proposition clarity",
+        criteria_objections: "Objection handling",
+        criteria_engagement: "Prospect engagement",
+        criteria_next_step: "Clear next step",
+        transcript_title: "Transcript",
+        speaker: "Speaker",
+        no_transcript_available: "No transcript available.",
+        analyze_btn: "Analyze meeting",
+        analyzing_btn: "Analyzing...",
+        clear_btn: "Clear",
+        meeting_label: "Meeting",
+        coaching_section: "Coaching",
+        representative: "Representative",
+        reset_code_prompt: "Code required to reset memory",
+        memory_reset_done: "Memory reset. Paste a transcript and start analysis.",
+        client: "Client",
+        reference: "Reference",
+        date: "Date"
+      }
+    };
+    function t(key) {
+      const l = localStorage.getItem('ez_lang') || 'fr';
+      return T[l]?.[key] || T.fr[key] || key;
+    }
     const REPS = [
       { value: 'Marie-Eve', label: 'Marie' },
       { value: 'Meher', label: 'Meher' },
@@ -45,37 +213,70 @@
     let lastCopySummary = '';
 
     fields.meetingDate.value = fields.meetingDate.value || new Date().toISOString().slice(0, 10);
-    fields.salesRep.value = normalizeSalesRep(localStorage.getItem('ez_meeting_sales_rep') || fields.salesRep.value || 'Marie-Eve');
-    fields.salesRep.addEventListener('change', () => {
-      fields.salesRep.value = normalizeSalesRep(fields.salesRep.value);
-      localStorage.setItem('ez_meeting_sales_rep', fields.salesRep.value);
-      renderMemory(latestMemory || {});
-    });
+    // Initial value configuration and change listener will be handled in patchFormControls()
     if (fields.meetingType && !fields.meetingType.value) fields.meetingType.value = 'Démo/discovery';
 
-    function patchFormControls() {
+    async function patchFormControls() {
       const referenceInput = $('meetingReference');
       const referenceField = referenceInput?.closest('.field');
       if (referenceField && !$('meetingProspectSource')) {
+        const lang = localStorage.getItem('ez_lang') || 'fr';
+        const labelText = lang === 'fr' ? 'Source prospect' : 'Prospect source';
+        const placeHolder = lang === 'fr' ? 'Ex. DocuSign, Hopem, référence, web' : 'Ex. DocuSign, Hopem, referral, web';
         referenceField.insertAdjacentHTML('afterend', `
           <div class="field">
-            <label for="meetingProspectSource">Source prospect</label>
-            <input id="meetingProspectSource" type="text" placeholder="Ex. DocuSign, Hopem, référence, web" autocomplete="off" />
+            <label for="meetingProspectSource">${labelText}</label>
+            <input id="meetingProspectSource" type="text" placeholder="${placeHolder}" autocomplete="off" />
           </div>
         `);
       }
 
       const repControl = $('meetingSalesRep');
-      if (repControl && repControl.tagName.toLowerCase() !== 'select') {
+      if (repControl) {
+        let items = [];
+        try {
+          const res = await api('/api/public/reps');
+          if (res && res.items && res.items.length) {
+            items = res.items;
+          }
+        } catch (e) {
+          console.error('Failed to load reps from backend, using defaults:', e);
+        }
+
+        if (!items.length) {
+          items = ['Marie-Eve', 'Meher'];
+        }
+
         const select = document.createElement('select');
         select.id = repControl.id;
         select.name = repControl.name || repControl.id;
         select.className = repControl.className || '';
-        select.innerHTML = REPS
-          .map(rep => `<option value="${rep.value}">${rep.label}</option>`)
+        select.innerHTML = items
+          .map(email => `<option value="${email}">${displayRep(email)}</option>`)
           .join('');
-        select.value = normalizeSalesRep(repControl.value || localStorage.getItem('ez_meeting_sales_rep') || 'Marie-Eve');
-        repControl.replaceWith(select);
+
+        const loggedInUserEmail = window.ezAuth?.user?.email;
+        let defaultRep = loggedInUserEmail;
+        if (!defaultRep) {
+          defaultRep = localStorage.getItem('ez_meeting_sales_rep');
+        }
+        if (!defaultRep && items.length) {
+          defaultRep = items[0];
+        }
+        
+        select.value = normalizeSalesRep(defaultRep);
+        if (repControl.tagName.toLowerCase() !== 'select') {
+          repControl.replaceWith(select);
+        } else {
+          repControl.innerHTML = select.innerHTML;
+          repControl.value = select.value;
+        }
+        
+        fields.salesRep = $('meetingSalesRep');
+        fields.salesRep.addEventListener('change', () => {
+          localStorage.setItem('ez_meeting_sales_rep', fields.salesRep.value);
+          renderMemory(latestMemory || {});
+        });
       }
 
       const typeControl = $('meetingType');
@@ -93,14 +294,20 @@
     }
 
     function normalizeSalesRep(value) {
-      const text = String(value || '').trim().toLowerCase();
-      if (text === 'meher') return 'Meher';
-      if (text.includes('marie')) return 'Marie-Eve';
-      return 'Marie-Eve';
+      return String(value || '').trim();
     }
 
     function displayRep(value) {
-      return normalizeSalesRep(value) === 'Marie-Eve' ? 'Marie' : 'Meher';
+      const text = String(value || '').trim();
+      if (!text) return '';
+      if (text.includes('@')) {
+        const part = text.split('@')[0]; // e.g. "christopher.lord"
+        return part.split(/[._-]/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+      }
+      const textLower = text.toLowerCase();
+      if (textLower === 'meher') return 'Meher';
+      if (textLower.includes('marie')) return 'Marie';
+      return text;
     }
 
     function escapeHTML(value) {
@@ -144,7 +351,7 @@
       return asArray(items).map(itemText).map(text => text.trim()).filter(Boolean);
     }
 
-    function listHTML(items, empty = 'Non confirmé') {
+    function listHTML(items, empty = t('unconfirmed')) {
       const clean = cleanItems(items);
       if (!clean.length) return `<p class="muted">${escapeHTML(empty)}</p>`;
       return `<ul>${clean.map(text => `<li>${escapeHTML(text)}</li>`).join('')}</ul>`;
@@ -152,7 +359,7 @@
 
     function detailListHTML(items, primaryKey, secondaryKeys = []) {
       const clean = asArray(items).filter(Boolean);
-      if (!clean.length) return '<p class="muted">Non confirmé</p>';
+      if (!clean.length) return `<p class="muted">${escapeHTML(t('unconfirmed'))}</p>`;
       return `<div class="meeting-detail-list">${clean.map(item => {
         if (typeof item === 'string') return `<div class="meeting-detail-item">${escapeHTML(item)}</div>`;
         const primary = item[primaryKey] || itemText(item);
@@ -172,10 +379,10 @@
     }
 
     function scoreLabel(total) {
-      if (total >= 85) return 'Excellent';
-      if (total >= 75) return 'Très bon';
-      if (total >= 55) return 'À renforcer';
-      return 'À risque';
+      if (total >= 85) return t('excellent');
+      if (total >= 75) return t('very_good');
+      if (total >= 55) return t('to_strengthen');
+      return t('at_risk');
     }
 
     async function api(path, options = {}) {
@@ -219,25 +426,33 @@
 
     function setBusy(isBusy) {
       analyzeBtn.disabled = isBusy;
-      analyzeBtn.textContent = isBusy ? 'Analyse en cours...' : 'Analyser la rencontre';
+      analyzeBtn.textContent = isBusy ? t('analyzing_btn') : t('analyze_btn');
     }
 
     function renderStatus(data) {
       const ollama = data.ollama || {};
       const count = data.memory?.count || 0;
       const avg = data.memory?.average_score;
+      const lang = localStorage.getItem('ez_lang') || 'fr';
       if (ollama.ok && ollama.model_available) {
         statusEl.className = 'meeting-ai-status ok';
-        statusEl.textContent = `Ollama prêt: ${ollama.model} | mémoire: ${count} rencontre${count > 1 ? 's' : ''}${avg ? ` | score moyen ${avg}/100` : ''}`;
+        const readyText = lang === 'fr' 
+          ? `Ollama prêt: ${ollama.model} | mémoire: ${count} rencontre${count > 1 ? 's' : ''}${avg ? ` | score moyen ${avg}/100` : ''}`
+          : `Ollama ready: ${ollama.model} | memory: ${count} meeting${count > 1 ? 's' : ''}${avg ? ` | average score ${avg}/100` : ''}`;
+        statusEl.textContent = readyText;
         return;
       }
       if (ollama.ok) {
         statusEl.className = 'meeting-ai-status warn';
-        statusEl.textContent = `Ollama répond, mais le modèle ${ollama.model} n'est pas disponible.`;
+        statusEl.textContent = lang === 'fr'
+          ? `Ollama répond, mais le modèle ${ollama.model} n'est pas disponible.`
+          : `Ollama responds, but model ${ollama.model} is not available.`;
         return;
       }
       statusEl.className = 'meeting-ai-status warn';
-      statusEl.textContent = `Ollama ne répond pas encore: ${ollama.error || 'service indisponible'}`;
+      statusEl.textContent = lang === 'fr'
+        ? `Ollama ne répond pas encore: ${ollama.error || 'service indisponible'}`
+        : `Ollama not responding yet: ${ollama.error || 'service unavailable'}`;
     }
 
     function renderCountList(items, empty) {
@@ -256,43 +471,48 @@
       const avg = latestMemory.average_score;
       const selectedRep = normalizeSalesRep(fields.salesRep.value);
       const repMemory = latestMemory.by_rep?.[selectedRep];
+      const lang = localStorage.getItem('ez_lang') || 'fr';
+      
+      const mText = lang === 'fr' 
+        ? `<b>${count}</b> rencontre${count > 1 ? 's' : ''} en mémoire${avg ? `, score moyen <b>${avg}/100</b>` : ''}.`
+        : `<b>${count}</b> meeting${count > 1 ? 's' : ''} in memory${avg ? `, average score <b>${avg}/100</b>` : ''}.`;
 
       memoryEl.innerHTML = `
         <div class="meeting-memory-summary">
-          <b>${count}</b> rencontre${count > 1 ? 's' : ''} en mémoire${avg ? `, score moyen <b>${avg}/100</b>` : ''}.
+          ${mText}
         </div>
         <div class="meeting-memory-group">
-          <b>Objections fréquentes</b>
-          ${renderCountList(latestMemory.frequent_objections, 'Aucune encore.')}
+          <b>${escapeHTML(t('frequent_objections'))}</b>
+          ${renderCountList(latestMemory.frequent_objections, t('none_yet'))}
         </div>
         <div class="meeting-memory-group">
-          <b>Intérêts fréquents</b>
-          ${renderCountList(latestMemory.frequent_interests, 'Aucun encore.')}
+          <b>${escapeHTML(t('frequent_interests'))}</b>
+          ${renderCountList(latestMemory.frequent_interests, t('none_yet_m'))}
         </div>
         <div class="meeting-memory-group">
-          <b>Sources prospect fréquentes</b>
-          ${renderCountList(latestMemory.frequent_sources, 'Aucune source encore.')}
+          <b>${escapeHTML(t('frequent_sources'))}</b>
+          ${renderCountList(latestMemory.frequent_sources, t('no_sources_yet'))}
         </div>
         <div class="meeting-memory-group">
-          <b>Coaching ${displayRep(selectedRep)}</b>
-          ${renderCountList(repMemory?.frequent_coaching, 'Pas encore assez de rencontres pour ce représentant.')}
+          <b>${escapeHTML(t('coaching_for'))} ${displayRep(selectedRep)}</b>
+          ${renderCountList(repMemory?.frequent_coaching, t('not_enough_meetings'))}
         </div>
         <div class="meeting-score-chart-panel">
           <div class="meeting-chart-controls">
             <select id="meetingChartRep" aria-label="Représentant du graphique">
               <option value="Marie-Eve"${selectedRep === 'Marie-Eve' ? ' selected' : ''}>Marie</option>
               <option value="Meher"${selectedRep === 'Meher' ? ' selected' : ''}>Meher</option>
-              <option value="all">All</option>
+              <option value="all">${escapeHTML(t('all'))}</option>
             </select>
             <select id="meetingChartRange" aria-label="Période du graphique">
-              <option value="current">Mois courant</option>
-              <option value="all">All</option>
+              <option value="current">${escapeHTML(t('current_month'))}</option>
+              <option value="all">${escapeHTML(t('all'))}</option>
             </select>
           </div>
           <div id="meetingScoreChart" class="meeting-score-chart"></div>
         </div>
         <div class="meeting-memory-reset">
-          <button id="meetingResetMemoryBtn" class="chip btn-ghost" type="button">Réinitialiser mémoire</button>
+          <button id="meetingResetMemoryBtn" class="chip btn-ghost" type="button">${escapeHTML(t('reset_memory'))}</button>
         </div>
       `;
 
@@ -335,7 +555,7 @@
       const pointCount = entries.reduce((sum, [, points]) => sum + points.length, 0);
 
       if (!pointCount) {
-        target.innerHTML = '<div class="meeting-chart-empty">Aucun score à afficher pour cette vue.</div>';
+        target.innerHTML = `<div class="meeting-chart-empty">${escapeHTML(t('no_scores_chart'))}</div>`;
         return;
       }
 
@@ -361,7 +581,7 @@
       }).join('');
 
       const avgLine = !allMode && avg != null
-        ? `<line class="line-average" x1="${pad}" x2="${width - pad}" y1="${yFor(avg)}" y2="${yFor(avg)}" /><text class="avg-label" x="${width - pad}" y="${Math.max(12, yFor(avg) - 4)}">Moy. mois précédent ${avg}</text>`
+        ? `<line class="line-average" x1="${pad}" x2="${width - pad}" y1="${yFor(avg)}" y2="${yFor(avg)}" /><text class="avg-label" x="${width - pad}" y="${Math.max(12, yFor(avg) - 4)}">${escapeHTML(t('avg_prev_month'))} ${avg}</text>`
         : '';
 
       target.innerHTML = `
@@ -376,7 +596,7 @@
         </svg>
         <div class="meeting-chart-legend">
           ${Object.keys(series).map(name => `<span class="${name === 'Marie' ? 'legend-marie' : 'legend-meher'}">${escapeHTML(name)}</span>`).join('')}
-          ${!allMode && avg != null ? '<span class="legend-average">Moyenne mois précédent</span>' : ''}
+          ${!allMode && avg != null ? `<span class="legend-average">${escapeHTML(t('average_prev_month'))}</span>` : ''}
         </div>
       `;
     }
@@ -384,15 +604,16 @@
     function renderHistory(items = []) {
       latestHistory = items;
       if (!items.length) {
-        historyEl.innerHTML = '<div class="meeting-history-empty">Aucune rencontre analysée encore.</div>';
+        historyEl.innerHTML = `<div class="meeting-history-empty">${escapeHTML(t('no_meetings_analyzed'))}</div>`;
         return;
       }
       historyEl.innerHTML = items.map(item => {
         const total = Number(item.score || 0);
+        const nameText = item.client_name || (localStorage.getItem('ez_lang') === 'en' ? 'Unnamed client' : 'Client non nommé');
         return `
           <button class="meeting-history-item ${scoreClass(total)}" type="button" data-meeting-id="${item.id}">
             <span>
-              <b>${escapeHTML(item.client_name || 'Client non nommé')}</b>
+              <b>${escapeHTML(nameText)}</b>
               <small>${escapeHTML(item.meeting_date || item.created_at || '')}${item.sales_rep ? ` | ${escapeHTML(displayRep(item.sales_rep))}` : ''}</small>
               ${item.prospect_source ? `<em>${escapeHTML(item.prospect_source)}</em>` : ''}
             </span>
@@ -421,24 +642,80 @@
       });
     }
 
+    function translateCriterion(c) {
+      if (!c) return '';
+      const cLower = c.toLowerCase();
+      if (cLower.includes('découverte') || cLower.includes('needs')) return t('criteria_discovery');
+      if (cLower.includes('qualification') || cLower.includes('volume')) return t('criteria_qualification');
+      if (cLower.includes('proposition') || cLower.includes('value')) return t('criteria_value');
+      if (cLower.includes('objection')) return t('criteria_objections');
+      if (cLower.includes('engagement') || cLower.includes('prospect')) return t('criteria_engagement');
+      if (cLower.includes('prochaine') || cLower.includes('next')) return t('criteria_next_step');
+      return c;
+    }
+
     function renderScore(score, annualValue) {
       const total = Number(score?.total || 0);
       const breakdown = asArray(score?.breakdown);
       const valueDisplay = annualValue?.available ? annualValue.display : '---$';
+      
+      const isEzmax = window.ezAuth?.user?.activeBrand === 'ezmax';
+      const userWord = isEzmax 
+        ? 'agents'
+        : ((localStorage.getItem('ez_lang') || 'fr') === 'en' ? 'users' : 'utilisateurs');
+      
       const valueDetail = annualValue?.available
-        ? `${annualValue.account_type || ''}${annualValue.users_count ? ` | ${annualValue.users_count} utilisateurs` : ''}`
-        : 'Données insuffisantes';
+        ? `${annualValue.account_type || ''}${annualValue.users_count ? ` | ${annualValue.users_count} ${userWord}` : ''}`
+        : t('insufficient_data');
+
+      const dealHotness = lastAnalysis?.deal_hotness || { score: 0, evidence: '' };
+      const dhScore = Number(dealHotness.score || 0);
+      const dhEvidence = dealHotness.evidence || '';
+      const dhColor = dhScore >= 8 ? '#22c55e' : (dhScore >= 5 ? '#d97706' : '#ef4444');
+
+      const closeWon = lastAnalysis?.close_won_probability || { percentage: 68, evidence: '' };
+      const cwPct = Number(closeWon.percentage || 68);
+      const cwEvidence = closeWon.evidence || '';
+      const cwColor = cwPct >= 75 ? '#22c55e' : (cwPct >= 50 ? '#d97706' : '#ef4444');
+
       return `
         <div class="meeting-score-wrap ${scoreClass(total)}">
-          <div class="meeting-score-badge ${scoreClass(total)}">
-            <strong>${total}</strong>
-            <span>/100</span>
+          <div class="meeting-score-left-panel" style="display: flex; flex-direction: column; gap: 14px; grid-column: 1 / span 2;">
+            <div style="display: flex; gap: 14px; align-items: center;">
+              <div class="meeting-score-badge ${scoreClass(total)}">
+                <strong>${total}</strong>
+                <span>/100</span>
+              </div>
+              <div class="meeting-annual-value ${annualValue?.available ? scoreClass(total) : 'score-neutral'}" style="flex: 1; min-height: 112px;">
+                <span>${escapeHTML(t('annualized_value'))}</span>
+                <strong>${escapeHTML(valueDisplay)}</strong>
+                <small>${escapeHTML(valueDetail)}</small>
+              </div>
+            </div>
+            
+            <div class="meeting-score-row" style="margin-top: 6px; padding: 10px; border: 1px solid var(--brand-border); border-radius: 10px; background: var(--output-bg);">
+              <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 13px;">
+                <span>${escapeHTML(t('deal_hotness'))}</span>
+                <b style="color: var(--brand-primary);">${dhScore}/10</b>
+              </div>
+              <div style="height: 6px; background: var(--brand-soft); border-radius: 3px; margin: 6px 0; overflow: hidden; border: 1px solid var(--brand-border);">
+                <div style="height: 100%; width: ${dhScore * 10}%; background: ${dhColor}; border-radius: 3px;"></div>
+              </div>
+              ${dhEvidence ? `<small style="display: block; color: var(--ink-muted); font-size: 11px; margin-top: 4px; line-height: 1.3;">${escapeHTML(dhEvidence)}</small>` : ''}
+            </div>
+
+            <div class="meeting-score-row" style="padding: 10px; border: 1px solid var(--brand-border); border-radius: 10px; background: var(--output-bg);">
+              <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 13px;">
+                <span>${escapeHTML(t('win_rate'))}</span>
+                <b style="color: var(--brand-primary);">${cwPct}%</b>
+              </div>
+              <div style="height: 6px; background: var(--brand-soft); border-radius: 3px; margin: 6px 0; overflow: hidden; border: 1px solid var(--brand-border);">
+                <div style="height: 100%; width: ${cwPct}%; background: ${cwColor}; border-radius: 3px;"></div>
+              </div>
+              ${cwEvidence ? `<small style="display: block; color: var(--ink-muted); font-size: 11px; margin-top: 4px; line-height: 1.3;">${escapeHTML(cwEvidence)}</small>` : ''}
+            </div>
           </div>
-          <div class="meeting-annual-value ${annualValue?.available ? scoreClass(total) : 'score-neutral'}">
-            <span>Valeur annualisée</span>
-            <strong>${escapeHTML(valueDisplay)}</strong>
-            <small>${escapeHTML(valueDetail)}</small>
-          </div>
+
           <div class="meeting-score-copy">
             <h5>${escapeHTML(score?.label || scoreLabel(total))}</h5>
             <div class="meeting-score-bars">
@@ -448,7 +725,7 @@
                 const width = Math.max(0, Math.min(100, (value / max) * 100));
                 return `
                   <div class="meeting-score-row ${scoreClass(width)}">
-                    <span>${escapeHTML(row.criterion || 'Critère')}</span>
+                    <span>${escapeHTML(translateCriterion(row.criterion))}</span>
                     <b>${value}/${max}</b>
                     <i><em style="width:${width}%"></em></i>
                     ${row.evidence ? `<small>${escapeHTML(row.evidence)}</small>` : ''}
@@ -469,86 +746,93 @@
       const score = lastAnalysis.score || {};
       const total = Number(score.total || 0);
       lastCopySummary = buildCopySummary(lastAnalysis, lastMeta);
+      const lang = localStorage.getItem('ez_lang') || 'fr';
 
       metaEl.textContent = meta.model
-        ? `Modèle ${meta.model}${meta.duration_ms ? ` | ${Math.round(meta.duration_ms / 1000)} s` : ''}`
+        ? (lang === 'fr' 
+            ? `Modèle ${meta.model}${meta.duration_ms ? ` | ${Math.round(meta.duration_ms / 1000)} s` : ''}`
+            : `Model ${meta.model}${meta.duration_ms ? ` | ${Math.round(meta.duration_ms / 1000)} s` : ''}`)
         : '';
 
       resultEl.classList.remove('empty-state');
+      const clientText = note.client || (lang === 'fr' ? 'Client non confirmé' : 'Unconfirmed client');
+      const sourceLabelText = lang === 'fr' ? 'Source' : 'Source';
+      const sourceText = meta.prospect_source ? ` | ${sourceLabelText}: ${escapeHTML(meta.prospect_source)}` : '';
+      
       resultEl.innerHTML = `
         <div class="meeting-note-header ${scoreClass(total)}">
           <div>
-            <span>Note de rencontre</span>
-            <h4>${escapeHTML(note.client || 'Client non confirmé')}</h4>
-            <small>${escapeHTML(note.reference || '')}${meta.prospect_source ? ` | Source: ${escapeHTML(meta.prospect_source)}` : ''}</small>
+            <span>${escapeHTML(t('meeting_note'))}</span>
+            <h4>${escapeHTML(clientText)}</h4>
+            <small>${escapeHTML(note.reference || '')}${sourceText}</small>
           </div>
           <div class="meeting-note-actions">
             <strong class="${scoreClass(total)}">${total}/100</strong>
-            <button id="meetingCopySummaryBtn" class="chip btn-ghost meeting-copy-btn" type="button">Copier le résumé</button>
-            <button id="meetingTranscriptBtn" class="chip btn-ghost meeting-copy-btn" type="button">Voir transcript</button>
+            <button id="meetingCopySummaryBtn" class="chip btn-ghost meeting-copy-btn" type="button">${escapeHTML(t('copy_summary'))}</button>
+            <button id="meetingTranscriptBtn" class="chip btn-ghost meeting-copy-btn" type="button">${escapeHTML(t('view_transcript'))}</button>
           </div>
         </div>
 
         <section class="meeting-result-section">
-          <h5>Résumé exécutif</h5>
-          <p>${escapeHTML(lastAnalysis.resume_executif || 'Non confirmé')}</p>
+          <h5>${escapeHTML(t('exec_summary'))}</h5>
+          <p>${escapeHTML(lastAnalysis.resume_executif || t('unconfirmed'))}</p>
         </section>
 
         <section class="meeting-result-section meeting-improvements">
-          <h5>Améliorations</h5>
-          ${listHTML(lastAnalysis.ameliorations_salesman?.length ? lastAnalysis.ameliorations_salesman : lastAnalysis.recommandations_coaching, 'Aucune amélioration précise pour l’instant.')}
+          <h5>${escapeHTML(t('improvements'))}</h5>
+          ${listHTML(lastAnalysis.ameliorations_salesman?.length ? lastAnalysis.ameliorations_salesman : lastAnalysis.recommandations_coaching, t('no_improvements'))}
         </section>
 
         <section class="meeting-result-section">
-          <h5>Score de rencontre</h5>
+          <h5>${escapeHTML(t('meeting_score'))}</h5>
           ${renderScore(score, lastAnalysis.estimated_annual_value)}
         </section>
 
         <div class="meeting-result-grid">
           <section class="meeting-result-section">
-            <h5>Contexte</h5>
+            <h5>${escapeHTML(t('context'))}</h5>
             ${listHTML(note.contexte)}
           </section>
           <section class="meeting-result-section">
-            <h5>Utilisation prévue</h5>
+            <h5>${escapeHTML(t('intended_use'))}</h5>
             ${listHTML(note.utilisation_prevue)}
           </section>
           <section class="meeting-result-section">
-            <h5>Processus actuel</h5>
+            <h5>${escapeHTML(t('current_process'))}</h5>
             ${listHTML(note.processus_actuel)}
           </section>
           <section class="meeting-result-section">
-            <h5>Options envisagées</h5>
+            <h5>${escapeHTML(t('options_considered'))}</h5>
             ${listHTML(note.options_envisagees)}
           </section>
         </div>
 
         <section class="meeting-result-section">
-          <h5>Prochaines étapes</h5>
+          <h5>${escapeHTML(t('next_steps'))}</h5>
           ${listHTML(note.prochaines_etapes)}
         </section>
 
         <div class="meeting-result-grid">
           <section class="meeting-result-section">
-            <h5>Objections principales</h5>
+            <h5>${escapeHTML(t('key_objections'))}</h5>
             ${detailListHTML(lastAnalysis.objections_principales, 'objection', ['importance', 'reponse_recommandee'])}
           </section>
           <section class="meeting-result-section">
-            <h5>Points intéressants pour le client</h5>
+            <h5>${escapeHTML(t('client_interests'))}</h5>
             ${detailListHTML(lastAnalysis.points_interet_client, 'point', ['signal', 'niveau'])}
           </section>
           <section class="meeting-result-section">
-            <h5>Recommandations</h5>
+            <h5>${escapeHTML(t('recommendations'))}</h5>
             ${listHTML(lastAnalysis.recommandations_coaching)}
           </section>
           <section class="meeting-result-section">
-            <h5>Risques</h5>
+            <h5>${escapeHTML(t('risks'))}</h5>
             ${listHTML(lastAnalysis.risques_red_flags)}
           </section>
         </div>
 
         <section class="meeting-result-section">
-          <h5>Registre pour les prochaines rencontres</h5>
+          <h5>${escapeHTML(t('next_meetings_registry'))}</h5>
           ${renderRegistry(lastAnalysis.registre || {}, lastAnalysis.memoire_a_reutiliser || [])}
         </section>
       `;
@@ -559,25 +843,25 @@
 
     function renderRegistry(registry, memory) {
       const keys = [
-        ['client_profile', 'Profil client'],
-        ['pain_points', 'Pain points'],
-        ['decision_criteria', 'Critères de décision'],
-        ['stakeholders', 'Parties prenantes'],
-        ['usage_and_volume', 'Utilisation / volumes'],
-        ['prospect_source', 'Source prospect'],
-        ['follow_up_promises', 'Promesses de suivi'],
+        ['client_profile', t('client_profile')],
+        ['pain_points', t('pain_points')],
+        ['decision_criteria', t('decision_criteria')],
+        ['stakeholders', t('stakeholders')],
+        ['usage_and_volume', t('usage_and_volume')],
+        ['prospect_source', t('prospect_source')],
+        ['follow_up_promises', t('follow_up_promises')],
       ];
       return `
         <div class="meeting-registry">
           ${keys.map(([key, label]) => `
             <div>
-              <b>${label}</b>
-              ${listHTML(registry[key], 'Non confirmé')}
+              <b>${escapeHTML(label)}</b>
+              ${listHTML(registry[key], t('unconfirmed'))}
             </div>
           `).join('')}
           <div>
-            <b>Mémoire à réutiliser</b>
-            ${listHTML(memory, 'Aucun élément')}
+            <b>${escapeHTML(t('memory_to_reuse'))}</b>
+            ${listHTML(memory, t('no_items'))}
           </div>
         </div>
       `;
@@ -598,30 +882,43 @@
       const nextSteps = note.prochaines_etapes || [];
       const source = meta.prospect_source || fields.prospectSource.value.trim() || '';
 
+      const usage = analysis.usage_profile || {};
       return [
-        '📝 Note de rencontre',
+        `📝 Note de rencontre – ${note.client || fields.clientName.value.trim() || 'Client non confirmé'}`,
         '',
-        `Client : ${note.client || fields.clientName.value.trim() || 'Non confirmé'}`,
         `Date : ${note.date || fields.meetingDate.value || 'Non confirmé'}`,
+        `Contact : ${note.client || fields.clientName.value.trim() || 'Non confirmé'}`,
         `Référence : ${note.reference || fields.reference.value.trim() || 'Non confirmé'}`,
         source ? `Source prospect : ${source}` : '',
         `Représentant : ${displayRep(meta.sales_rep || fields.salesRep.value)}`,
         '',
-        sectionText('📌 Résumé exécutif', [analysis.resume_executif || 'Non confirmé']),
+        sectionText('🎯 Contexte et niveau de maturité', note.contexte),
         '',
-        sectionText('📌 Contexte', note.contexte),
+        sectionText('🏢 Situation actuelle', note.processus_actuel),
         '',
-        sectionText('👥 Utilisation prévue', note.utilisation_prevue),
+        sectionText('🎯 Objectif', [
+          analysis.resume_executif || 'Non confirmé',
+          usage.users_count ? `${usage.users_count} utilisateur(s) identifié(s)` : '',
+          usage.manual_sends_monthly ? `${usage.manual_sends_monthly} envoi(s) manuel(s) par mois` : '',
+          usage.api_sends_monthly ? `${usage.api_sends_monthly} envoi(s) API par mois` : '',
+        ]),
         '',
-        sectionText('🏢 Processus actuel', note.processus_actuel),
+        sectionText('📌 Points validés durant la rencontre', [
+          ...asArray(note.utilisation_prevue),
+          ...asArray(note.options_envisagees),
+          ...interests,
+        ]),
         '',
-        sectionText('🔎 Options envisagées', note.options_envisagees),
+        sectionText('💬 Impression générale', interests.length ? interests : ['Non confirmé']),
         '',
         sectionText('⚠️ Objections principales', objections),
         '',
-        sectionText('✅ Points intéressants pour le client', interests),
+        sectionText('🔜 Prochaines étapes', nextSteps),
         '',
-        sectionText('📌 Prochaines étapes', nextSteps),
+        sectionText('⏳ Autres éléments à considérer', [
+          source ? `Source / solution comparée : ${source}` : '',
+          usage.evidence || '',
+        ]),
       ].filter(line => line !== '').join('\n');
     }
 
@@ -643,7 +940,7 @@
       }
       if (button) {
         const old = button.textContent;
-        button.textContent = 'Résumé copié';
+        button.textContent = t('summary_copied');
         window.setTimeout(() => { button.textContent = old; }, 1600);
       }
     }
@@ -675,6 +972,7 @@
         salesRep: normalizeSalesRep(fields.salesRep.value),
         meetingType: fields.meetingType.value || 'Démo/discovery',
         transcript: fields.transcript.value.trim(),
+        platformLang: localStorage.getItem('ez_lang') || 'fr',
       };
     }
 
@@ -682,7 +980,7 @@
       const payload = payloadFromForm();
       if (payload.transcript.length < 50) {
         resultEl.classList.remove('empty-state');
-        resultEl.innerHTML = '<div class="meeting-error">Colle un transcript plus complet avant de lancer l’analyse.</div>';
+        resultEl.innerHTML = `<div class="meeting-error">${escapeHTML(t('paste_more_complete'))}</div>`;
         fields.transcript.focus();
         return;
       }
@@ -690,7 +988,7 @@
       setBusy(true);
       const flight = startAnalyzeFlight(analyzeBtn);
       resultEl.classList.remove('empty-state');
-      resultEl.innerHTML = '<div class="meeting-loading">Analyse locale en cours avec Ollama. Ça peut prendre quelques secondes.</div>';
+      resultEl.innerHTML = `<div class="meeting-loading">${escapeHTML(t('local_analysis_running'))}</div>`;
       metaEl.textContent = '';
 
       try {
@@ -714,6 +1012,9 @@
         latestStats = stats;
         renderMemory(memory);
         renderHistory(history.items || []);
+        window.dispatchEvent(new CustomEvent('ezsign:analysis-generated', {
+          detail: { id: data.id, score: data.score, clientName: payload.clientName, notSaved: data.not_saved },
+        }));
       } catch (error) {
         flight.cancel();
         resultEl.innerHTML = `<div class="meeting-error">${escapeHTML(error.message)}</div>`;
@@ -723,7 +1024,7 @@
     }
 
     async function resetMemory() {
-      const code = window.prompt('Code requis pour réinitialiser la mémoire');
+      const code = window.prompt(t('reset_code_prompt'));
       if (code === null) return;
       try {
         const data = await api('/meetings/reset', {
@@ -735,7 +1036,7 @@
         renderMemory(data.memory || {});
         renderHistory([]);
         resultEl.classList.add('empty-state');
-        resultEl.textContent = 'Mémoire réinitialisée. Colle un transcript et lance l’analyse.';
+        resultEl.textContent = t('memory_reset_done');
         metaEl.textContent = '';
       } catch (error) {
         window.alert(error.message);
@@ -750,7 +1051,7 @@
       fields.meetingDate.value = new Date().toISOString().slice(0, 10);
       fields.meetingType.value = 'Démo/discovery';
       resultEl.classList.add('empty-state');
-      resultEl.textContent = 'Colle un transcript et lance l’analyse.';
+      resultEl.textContent = t('paste_transcript_prompt');
       metaEl.textContent = '';
       fields.clientName.focus();
     }
@@ -926,11 +1227,49 @@
       }
     }
 
+    async function loadAnalysis(id) {
+      try {
+        const data = await api(`/meetings/analyses/${id}`);
+        if (fields.clientName) fields.clientName.value = data.client_name || '';
+        if (fields.meetingDate) fields.meetingDate.value = (data.meeting_date || data.created_at || '').slice(0, 10);
+        if (fields.reference) fields.reference.value = data.reference || '';
+        if (fields.prospectSource) fields.prospectSource.value = data.prospect_source || '';
+        if (fields.salesRep) fields.salesRep.value = normalizeSalesRep(data.sales_rep || 'Marie-Eve');
+        if (fields.meetingType) fields.meetingType.value = data.meeting_type || 'standard';
+        if (fields.transcript) fields.transcript.value = data.transcript || '';
+
+        renderAnalysis(data.analysis, {
+          id: data.id,
+          model: data.model,
+          duration_ms: data.duration_ms,
+          created_at: data.created_at,
+          sales_rep: data.sales_rep,
+          prospect_source: data.prospect_source,
+          transcript: data.transcript,
+        });
+      } catch (error) {
+        if (resultEl) resultEl.innerHTML = `<div class="meeting-error">${escapeHTML(error.message)}</div>`;
+      }
+    }
+    window.ezMeetingAi = { loadAnalysis, clearForm };
+
     openBtn.addEventListener('click', openModal);
     analyzeBtn.addEventListener('click', analyzeMeeting);
     clearBtn.addEventListener('click', clearForm);
     refreshBtn?.addEventListener('click', loadAll);
     modal.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', closeModal));
+
+    window.addEventListener('ezsign:lang-changed', () => {
+      if (lastAnalysis) {
+        renderAnalysis(lastAnalysis, lastMeta);
+      }
+      if (latestMemory) {
+        renderMemory(latestMemory);
+      }
+      if (latestHistory) {
+        renderHistory(latestHistory);
+      }
+    });
 
     loadAll();
   });

@@ -2,6 +2,8 @@
 
 <!DOCTYPE html>
 
+<!DOCTYPE html>
+
 <html lang="fr" data-theme="light">
 <head>
   <meta charset="UTF-8" />
@@ -9,10 +11,10 @@
   <title>Calculateur eZsign</title>
 
   <!-- Link to the stylesheet (same folder) -->
-  <link rel="stylesheet" href="style.css?v=2.7" />
+  <link rel="stylesheet" href="style.css?v=3.6" />
 </head>
 <body>
-  <div class="appbar">
+  <div class="appbar legacy-appbar" aria-hidden="true">
     <span class="appbar-ez-mark" aria-label="eZsign">ez</span>
     <div id="title" class="app-title">Calculateur eZsign</div>
 
@@ -28,15 +30,458 @@
     <button id="langBtn" class="lang-btn">EN</button>
   </div>
 
-  <main class="container">
-    <div class="inline-toolbar">
-      <button id="inlineCompareBtn" class="chip btn-ghost">
-        + Comparer (ajouter une colonne)
-      </button>
-    </div>
+  <div class="platform-shell">
+    <header class="platform-topbar">
+      <div class="topbar-left">
+        <button id="sidebarToggle" class="platform-icon-btn" type="button" aria-label="Menu">☰</button>
+        <img id="platformLogo" class="platform-logo" src="/logo-ezsign.png" alt="eZsign" />
+        <div class="quick-menu">
+          <button id="quickMenuBtn" class="quick-menu-btn" type="button">Quick menu ▾</button>
+          <div id="quickMenuPanel" class="quick-menu-panel">
+            <button type="button" data-action="new-proposal">Create proposal</button>
+            <button type="button" data-action="new-analysis">Meeting analysis</button>
+            <button type="button" data-view-target="calculator">Calculator</button>
+          </div>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button id="topSupportBtn" class="platform-pill" type="button">Support Centre</button>
+        <button id="topLangBtn" class="platform-pill" type="button">EN</button>
+        <button id="topUserAvatar" class="platform-user-avatar" type="button" title="Compte">EZ</button>
+      </div>
+    </header>
 
-    <div id="lanes" class="lanes"></div>
-  </main>
+    <aside class="platform-sidebar">
+      <nav>
+        <button class="side-link active" type="button" data-view-target="home"><span>⌂</span><b data-i18n="navHome">Home</b></button>
+        <button class="side-link has-sub" type="button" data-view-target="tasks-team"><span>☑</span><b data-i18n="navTasks">Tâches</b></button>
+        <div class="side-submenu">
+          <button type="button" data-view-target="tasks-team" data-i18n="navTasksTeam">Équipe</button>
+          <button type="button" data-view-target="tasks-personal" data-i18n="navTasksPersonal">Mes Tâches</button>
+        </div>
+        <button class="side-link" type="button" data-view-target="proposals"><span>▤</span><b data-i18n="navProposals">Proposals</b></button>
+        <button class="side-link has-sub" type="button" data-view-target="analysis-dashboard"><span>◎</span><b data-i18n="navAnalysis">Meeting analysis</b></button>
+        <div class="side-submenu">
+          <button type="button" data-view-target="analysis-dashboard" data-i18n="navAnalysisDashboard">Dashboard</button>
+          <button type="button" data-view-target="analysis-new" data-i18n="navAnalysisNew">Analysis</button>
+        </div>
+        <button class="side-link" type="button" data-view-target="calculator"><span>∑</span><b data-i18n="navCalculator">Calculator</b></button>
+        <button class="side-link" type="button" data-view-target="chat"><span>💬</span><b data-i18n="navChat">AI interne</b></button>
+        <button class="side-link" type="button" data-view-target="admin"><span>⚙</span><b data-i18n="navAdmin">Administration</b></button>
+      </nav>
+      <button id="sideThemeBtn" class="side-theme" type="button"><span>☀</span><b data-i18n="themeLight">Light mode</b><i></i></button>
+    </aside>
+
+    <main class="platform-main">
+      <section id="viewHome" class="app-view active" data-view="home">
+        <div class="page-head">
+          <div>
+            <h1 id="homeWelcome">Welcome</h1>
+            <p data-i18n="homeSubtitle">Choose what you want to work on.</p>
+          </div>
+        </div>
+        <div class="home-grid">
+          <section class="platform-card">
+            <h2 data-i18n="homeQuickTitle">What would you like to accomplish?</h2>
+            <button class="action-row" type="button" data-action="new-proposal">
+              <span>▤</span>
+              <b data-i18n="homeCreateProposal">Create a proposal</b>
+              <small data-i18n="homeCreateProposalSub">Generate Word, PDF, or both and keep it in the proposal dashboard.</small>
+            </button>
+            <button class="action-row" type="button" data-action="new-analysis">
+              <span>◎</span>
+              <b data-i18n="homeAnalyzeMeeting">Analyze a meeting</b>
+              <small data-i18n="homeAnalyzeMeetingSub">Paste a transcript and get a score, summary, objections, and coaching.</small>
+            </button>
+          </section>
+          <section class="platform-card">
+            <h2 data-i18n="homeNotifications">Informations</h2>
+            <div id="homeStats" class="metric-list"></div>
+          </section>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 18px; margin-top: 18px;">
+          <section id="adminSecurityAlertsHome" class="platform-card" hidden style="border-top: 3px solid #ef3340; box-shadow: 0 4px 12px rgba(239, 51, 64, 0.05);">
+            <div class="card-head">
+              <h2 style="color: #ef3340; margin: 0;">⚠️ Security Alerts</h2>
+              <button id="refreshAlertsBtn" class="platform-pill danger" type="button">Refresh</button>
+            </div>
+            <div id="securityAlertsList" class="dashboard-list" style="margin-top: 10px;"></div>
+          </section>
+
+          <section id="adminSupportHome" class="platform-card" hidden>
+            <div class="card-head">
+              <h2>Support Centre</h2>
+              <button id="refreshTicketsBtn" class="platform-pill" type="button">Refresh</button>
+            </div>
+            <div id="supportTicketsList" class="dashboard-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="viewTasksTeam" class="app-view" data-view="tasks-team">
+        <div class="page-head">
+          <div>
+            <h1 data-i18n="tasksTeamTitle">Tâches d'équipe</h1>
+            <p data-i18n="tasksTeamSub">Gère, organise et distribue les tâches au sein de l'équipe.</p>
+          </div>
+          <div class="header-actions">
+            <button class="primary-action refresh-tasks-btn" type="button" data-i18n="refresh">Rafraîchir</button>
+          </div>
+        </div>
+        <div class="dashboard-filters">
+          <div class="filter-group">
+            <label data-i18n="filterStatus">Statut :</label>
+            <select class="task-status-filter">
+              <option value="active" data-i18n="statusActive">Tâches actives (non fermées)</option>
+              <option value="all" data-i18n="statusAll">Toutes</option>
+              <option value="Not started" data-i18n="statusNotStarted">Non commencées (Not started)</option>
+              <option value="In progress" data-i18n="statusInProgress">En cours (In progress)</option>
+              <option value="Pending" data-i18n="statusPending">En attente (Pending)</option>
+              <option value="Blocked" data-i18n="statusBlocked">Bloquées (Blocked)</option>
+              <option value="Closed" data-i18n="statusClosed">Fermées (Closed)</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label data-i18n="filterSort">Trier par :</label>
+            <select class="task-sort-filter">
+              <option value="date-asc" data-i18n="sortDateAsc">Date (plus anciennes en haut)</option>
+              <option value="date-desc" data-i18n="sortDateDesc">Date (plus récentes en haut)</option>
+              <option value="priority" data-i18n="sortPriority">Priorité</option>
+              <option value="creator" data-i18n="sortCreator">Créateur</option>
+              <option value="alphabetical" data-i18n="sortAlphabetical">Ordre alphabétique</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="task-quick-create">
+          <input type="text" id="teamTaskQuickInput" class="task-quick-input" placeholder="Ajouter une tâche d'équipe... (Saisissez le nom et appuyez sur Entrée)" />
+        </div>
+
+        <div class="dashboard-table task-dashboard-table">
+          <table class="tasks-table">
+            <thead>
+              <tr>
+                <th style="width:10%;" data-i18n="thPriority">Priorité</th>
+                <th style="width:45%;" data-i18n="thTaskName">Nom de la tâche</th>
+                <th style="width:15%;" data-i18n="thStatus">Statut</th>
+                <th style="width:15%;" data-i18n="thCreatedBy">Créé par</th>
+                <th style="width:12%;" data-i18n="thDate">Date</th>
+                <th style="width:3%;"></th>
+              </tr>
+            </thead>
+            <tbody class="tasks-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="viewTasksPersonal" class="app-view" data-view="tasks-personal">
+        <div class="page-head">
+          <div>
+            <h1 data-i18n="tasksPersonalTitle">Mes Tâches</h1>
+            <p data-i18n="tasksPersonalSub">Vos tâches personnelles privées et les tâches d'équipe qui vous ont été assignées.</p>
+          </div>
+          <div class="header-actions">
+            <button class="primary-action refresh-tasks-btn" type="button" data-i18n="refresh">Rafraîchir</button>
+          </div>
+        </div>
+        <div class="dashboard-filters">
+          <div class="filter-group">
+            <label data-i18n="filterStatus">Statut :</label>
+            <select class="task-status-filter">
+              <option value="active" data-i18n="statusActive">Tâches actives (non fermées)</option>
+              <option value="all" data-i18n="statusAll">Toutes</option>
+              <option value="Not started" data-i18n="statusNotStarted">Non commencées (Not started)</option>
+              <option value="In progress" data-i18n="statusInProgress">En cours (In progress)</option>
+              <option value="Pending" data-i18n="statusPending">En attente (Pending)</option>
+              <option value="Blocked" data-i18n="statusBlocked">Bloquées (Blocked)</option>
+              <option value="Closed" data-i18n="statusClosed">Fermées (Closed)</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label data-i18n="filterSort">Trier par :</label>
+            <select class="task-sort-filter">
+              <option value="date-asc" data-i18n="sortDateAsc">Date (plus anciennes en haut)</option>
+              <option value="date-desc" data-i18n="sortDateDesc">Date (plus récentes en haut)</option>
+              <option value="priority" data-i18n="sortPriority">Priorité</option>
+              <option value="alphabetical" data-i18n="sortAlphabetical">Ordre alphabétique</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="task-quick-create">
+          <input type="text" id="personalTaskQuickInput" class="task-quick-input" placeholder="Ajouter une tâche personnelle... (Saisissez le nom et appuyez sur Entrée)" />
+        </div>
+
+        <div class="dashboard-table task-dashboard-table">
+          <table class="tasks-table">
+            <thead>
+              <tr>
+                <th style="width:10%;" data-i18n="thPriority">Priorité</th>
+                <th style="width:60%;" data-i18n="thTaskName">Nom de la tâche</th>
+                <th style="width:15%;" data-i18n="thStatus">Statut</th>
+                <th style="width:12%;" data-i18n="thDate">Date</th>
+                <th style="width:3%;"></th>
+              </tr>
+            </thead>
+            <tbody class="tasks-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="viewProposals" class="app-view" data-view="proposals">
+        <div class="page-head">
+          <div>
+            <h1 data-i18n="proposalDashboardTitle">Proposal dashboard</h1>
+            <p data-i18n="proposalDashboardSub">Search, filter, and download generated proposals.</p>
+          </div>
+          <button class="primary-action" type="button" data-action="new-proposal" data-i18n="newProposal">New proposal</button>
+        </div>
+        <div class="dashboard-filters">
+          <input id="proposalSearch" type="search" placeholder="Search company..." />
+          <select id="proposalLangFilter"><option value="">All languages</option><option value="fr">FR</option><option value="en">EN</option></select>
+          <button id="refreshProposalsBtn" class="platform-pill" type="button">Refresh</button>
+        </div>
+        <div id="proposalsDashboard" class="dashboard-table"></div>
+      </section>
+
+      <section id="viewProposalNew" class="app-view" data-view="proposal-new">
+        <div class="page-head">
+          <div>
+            <h1 data-i18n="proposalNewTitle">Nouvelle offre de service</h1>
+            <p data-i18n="proposalNewSub">Genere Word, PDF ou les deux, puis sauvegarde le resultat dans le dashboard.</p>
+          </div>
+          <button class="platform-pill" type="button" data-view-target="proposals" data-i18n="backToDashboard">Retour dashboard</button>
+        </div>
+        <div id="proposalBuilderMount" class="builder-mount"></div>
+      </section>
+
+      <section id="viewAnalysisDashboard" class="app-view" data-view="analysis-dashboard">
+        <div class="page-head">
+          <div>
+            <h1 data-i18n="analysisDashboardTitle">Meeting analysis dashboard</h1>
+            <p data-i18n="analysisDashboardSub">Track scores, objections, interests, and follow-ups.</p>
+          </div>
+          <button class="primary-action" type="button" data-view-target="analysis-new" data-i18n="newAnalysis">New analysis</button>
+        </div>
+        <div class="dashboard-filters">
+          <input id="analysisSearch" type="search" placeholder="Search client..." />
+          <select id="analysisRepFilter"><option value="">All reps</option><option value="Marie-Eve">Marie</option><option value="Meher">Meher</option></select>
+          <input id="analysisDateFrom" type="date" />
+          <input id="analysisDateTo" type="date" />
+          <button id="refreshAnalysisBtn" class="platform-pill" type="button">Refresh</button>
+        </div>
+        <div id="analysisDashboardInsights" class="insights-grid"></div>
+        <div id="analysisDashboard" class="dashboard-table"></div>
+      </section>
+
+      <section id="viewAnalysisNew" class="app-view" data-view="analysis-new">
+        <div class="page-head">
+          <div>
+            <h1 data-i18n="analysisWorkspaceTitle">Meeting analysis</h1>
+            <p data-i18n="analysisWorkspaceSub">Use the complete analysis workspace with memory, graph, transcript, and history.</p>
+          </div>
+          <button class="platform-pill" type="button" data-view-target="analysis-dashboard" data-i18n="backToDashboard">Retour dashboard</button>
+        </div>
+        <div id="analysisWorkspaceInsights" class="insights-grid"></div>
+        <div id="analysisBuilderMount" class="builder-mount"></div>
+      </section>
+
+      <section id="viewCalculator" class="app-view" data-view="calculator">
+        <div class="page-head">
+          <div>
+            <h1 data-i18n="calculatorTitle">Calculator</h1>
+            <p data-i18n="calculatorSub">Compare plans and generate proposal simulations.</p>
+          </div>
+          <div class="page-actions">
+            <button id="calculatorInfoBtn" class="platform-pill" type="button">i</button>
+            <button id="calculatorCompareBtn" class="platform-pill" type="button" data-i18n="compare">Comparer</button>
+          </div>
+        </div>
+        <div id="ezsignCalculator" class="container calculator-container">
+          <div class="inline-toolbar">
+            <button id="inlineCompareBtn" class="chip btn-ghost">
+              + Comparer (ajouter une colonne)
+            </button>
+          </div>
+          <div id="lanes" class="lanes"></div>
+        </div>
+
+        <div id="ezmaxCalculator" class="container calculator-container" style="display: none;">
+          <div class="ezmax-calculator-layout">
+            <div class="ezmax-calculator-grid">
+              <section class="platform-card ezmax-input-card">
+                <div class="card-head">
+                  <h2>Paramètres</h2>
+                </div>
+                <div class="form-grid">
+                  <label class="field field-wide" style="display: none;">
+                    <span>Nom de la compagnie</span>
+                    <input class="ezmax-company-name" type="text" placeholder="Ex. Agence immobilière" autocomplete="organization" />
+                  </label>
+                  <label class="field">
+                    <span>Agents immobiliers</span>
+                    <input class="ezmax-agents" type="number" min="1" max="1250" value="18" inputmode="numeric" />
+                  </label>
+                </div>
+                
+                <div class="module-grid">
+                  <label class="module-option">
+                    <input class="ezmax-include-ezmax" type="checkbox" checked />
+                    <span>
+                      <strong>eZmax</strong>
+                      <small class="muted">Système principal de courtage</small>
+                    </span>
+                  </label>
+                  <label class="module-option">
+                    <input class="ezmax-include-edm" type="checkbox" checked />
+                    <span>
+                      <strong>GED</strong>
+                      <small class="muted">Module documentaire optionnel</small>
+                    </span>
+                  </label>
+                  <label class="module-option">
+                    <input class="ezmax-include-ezsign" type="checkbox" />
+                    <span>
+                      <strong>eZsign</strong>
+                      <small class="muted">Module de signature optionnel</small>
+                    </span>
+                  </label>
+                </div>
+                
+                <div class="actions" style="margin-top: 18px; display: flex; gap: 10px;">
+                  <button class="platform-pill ezmax-reset-btn" type="button">Réinitialiser</button>
+                </div>
+              </section>
+              
+              <section class="platform-card ezmax-summary-card">
+                <div class="card-head">
+                  <h2>Résumé mensuel</h2>
+                  <span class="ezmax-tier-badge score-pill score-good" style="font-size: 11px;">11 - 20 agents</span>
+                </div>
+                
+                <div class="kpi-grid">
+                  <div class="kpi">
+                    <span class="muted">Frais d'installation</span>
+                    <strong class="ezmax-setup-cost">1 500,00 $</strong>
+                  </div>
+                  <div class="kpi">
+                    <span class="muted">Total mensuel</span>
+                    <strong class="ezmax-monthly-total" style="color: var(--brand-primary);">475,86 $</strong>
+                  </div>
+                  <div class="kpi">
+                    <span class="muted">Par agent</span>
+                    <strong class="ezmax-average-cost">26,44 $</strong>
+                  </div>
+                </div>
+                
+                <div class="ezmax-line-items" style="display: grid; gap: 8px; margin-top: 14px;"></div>
+              </section>
+              
+              <section class="platform-card ezmax-details-card" style="grid-column: 1 / -1; margin-top: 18px;">
+                <div class="card-head">
+                  <h2>Aperçu du calcul</h2>
+                </div>
+                <pre class="ezmax-calculation-preview" style="background: var(--brand-soft); border: 1px solid var(--brand-border); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; color: var(--ink); margin-top: 10px;"></pre>
+              </section>
+              
+              <section class="platform-card ezmax-pricing-card" style="grid-column: 1 / -1; margin-top: 18px;">
+                <div class="card-head">
+                  <h2>Tableau de tarification du contrat</h2>
+                </div>
+                <div class="dashboard-table" style="margin-top: 10px; padding: 0; border: 0;">
+                  <table class="ezmax-pricing-table" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                      <tr>
+                        <th>Agents</th>
+                        <th>Inclus</th>
+                        <th>eZmax</th>
+                        <th>eZmax TPASI</th>
+                        <th>GED</th>
+                        <th>GED TPASI</th>
+                        <th>eZsign</th>
+                        <th>eZsign TPASI</th>
+                        <th>Admins eZsign</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="viewChat" class="app-view" data-view="chat">
+        <div class="chat-container">
+          <!-- Chat sidebar with conversation history -->
+          <div class="chat-sidebar">
+            <div class="chat-sidebar-header">
+              <button id="chatNewBtn" class="platform-pill" type="button">💬 Nouvelle conversation</button>
+            </div>
+            <div id="chatConversationsList" class="chat-conversations-list">
+              <!-- Dynamically populated conversations -->
+            </div>
+          </div>
+          <!-- Chat work area -->
+          <div class="chat-main">
+            <div id="chatActiveHeader" class="chat-active-header" style="display:none">
+              <h2 id="chatActiveTitle">AI interne</h2>
+              <div class="chat-header-actions">
+                <button id="chatContextToggleBtn" class="platform-pill" type="button">📝 Contexte</button>
+                <button id="chatRenameBtn" class="platform-pill" type="button">Renommer</button>
+                <button id="chatDeleteBtn" class="platform-pill danger" type="button">Supprimer</button>
+              </div>
+            </div>
+            <div class="chat-workspace-row">
+              <div class="chat-messages-container">
+                <div id="chatMessagesArea" class="chat-messages-area">
+                  <div class="chat-empty-state">
+                    <div class="chat-empty-state-icon">🤖</div>
+                    <p>Commencez à clavarder avec l'IA interne. Vos conversations restent enregistrées et isolées.</p>
+                  </div>
+                </div>
+                <!-- Attachments list above input bar -->
+                <div id="chatAttachmentsPreview" class="chat-attachments-preview" style="display:none"></div>
+                <div class="chat-input-bar">
+                  <button id="chatAttachBtn" class="platform-pill" type="button" disabled title="Ajouter un fichier">+</button>
+                  <input type="file" id="chatFileInput" multiple style="display:none" />
+                  <textarea id="chatInputText" placeholder="Écrivez votre message à l'IA..." rows="1" disabled></textarea>
+                  <button id="chatSendBtn" class="platform-pill" type="button" disabled>Envoyer</button>
+                </div>
+              </div>
+              <!-- Context drawer panel on the right -->
+              <div id="chatContextDrawer" class="chat-context-drawer" style="display:none">
+                <div class="chat-context-header">
+                  <h3>Contexte du chat</h3>
+                </div>
+                <div class="chat-context-body">
+                  <p class="muted">Ajoutez des directives, des e-mails de référence ou d'autres informations que l'IA gardera en mémoire pour ce chat.</p>
+                  <textarea id="chatContextText" placeholder="Collez vos exemples d'e-mails, directives ou informations ici..."></textarea>
+                  <button id="chatSaveContextBtn" class="platform-pill" type="button">Enregistrer le contexte</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="viewAdmin" class="app-view" data-view="admin">
+        <div class="page-head">
+          <div>
+            <h1 data-i18n="adminTitle">Administration</h1>
+            <p data-i18n="adminSub">Manage your account, users, brands, and security settings.</p>
+          </div>
+        </div>
+        <div id="adminSettingsMount" class="builder-mount"></div>
+      </section>
+    </main>
+  </div>
 
   <!-- Pricing modal -->
   <div id="pricingModal" class="modal" aria-hidden="true">
@@ -59,6 +504,92 @@
         <button class="close-x" data-close>&times;</button>
       </div>
       <div id="compareBody" class="body"></div>
+    </div>
+  </div>
+
+  <!-- NEW, Offer modal -->
+
+  <!-- Pricing modal -->
+  <div id="pricingModal" class="modal" aria-hidden="true">
+    <div class="backdrop" data-close></div>
+    <div class="dialog" role="dialog" aria-modal="true">
+      <div class="head">
+        <h3 id="pricingTitle">Tarifs</h3>
+        <button class="close-x" data-close>&times;</button>
+      </div>
+      <div id="pricingBody" class="body"></div>
+    </div>
+  </div>
+
+  <!-- Compare modal -->
+  <div id="compareModal" class="modal" aria-hidden="true">
+    <div class="backdrop" data-close></div>
+    <div class="dialog" role="dialog" aria-modal="true">
+      <div class="head">
+        <h3 id="compareTitle">Comparer les forfaits</h3>
+        <button class="close-x" data-close>&times;</button>
+      </div>
+      <div id="compareBody" class="body"></div>
+    </div>
+  </div>
+
+  <!-- Task Details Modal -->
+  <div id="taskDetailsModal" class="modal" aria-hidden="true">
+    <div class="backdrop" data-close></div>
+    <div class="dialog task-details-dialog" role="dialog" aria-modal="true" style="max-width:1100px; width:96%; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-radius: 12px; overflow:hidden;">
+      <div class="head">
+        <h3 id="taskModalTitle">Détails de la tâche</h3>
+        <button class="close-x" data-close>&times;</button>
+      </div>
+      <div class="body task-modal-body" style="padding: 20px;">
+        <div class="task-modal-row" style="display:flex; gap:20px; flex-wrap:wrap;">
+          <div class="task-modal-main-col" style="flex:2; min-width:300px; display:flex; flex-direction:column; gap:14px;">
+            <div class="field">
+              <label for="taskDetailTitleInput" style="font-weight:600; font-size:12px; color:var(--ink-muted); text-transform:uppercase;">Nom de la tâche</label>
+              <input type="text" id="taskDetailTitleInput" class="task-detail-title-input" style="width:100%; font-size:16px; padding:10px; border:1px solid var(--brand-border); border-radius:8px; outline:none; background:var(--card-bg); color:var(--ink);" />
+            </div>
+            <div class="field" style="display:flex; flex-direction:column; gap:8px; flex: 1;">
+              <label style="font-weight:600; font-size:12px; color:var(--ink-muted); text-transform:uppercase;">Description / Notes & Conversations</label>
+              <div id="taskDetailCommentsList" class="task-comments-thread" style="min-height:280px; max-height:400px; overflow-y:auto; border:1px solid var(--brand-border); border-radius:8px; padding:15px; background:var(--brand-soft); display:flex; flex-direction:column; gap:12px;">
+                <!-- Comments populated dynamically -->
+              </div>
+              
+              <div class="task-comment-composer" style="display:flex; gap:10px; align-items:flex-end; margin-top:8px;">
+                <textarea id="taskNewCommentInput" placeholder="Écrire une note ou un commentaire..." style="flex:1; min-height:80px; padding:10px; border:1px solid var(--brand-border); border-radius:8px; outline:none; font-family:inherit; resize:vertical; background:var(--card-bg); color:var(--ink); line-height:1.4;"></textarea>
+                <button type="button" id="taskAddCommentBtn" class="primary-action" style="padding:10px 18px; text-transform:none; border-radius:8px; height:42px; font-weight:700; display:flex; align-items:center; justify-content:center;">Commenter</button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="task-modal-side-col" style="flex:1; min-width:200px; display:flex; flex-direction:column; gap:14px; background:var(--brand-soft); padding:15px; border-radius:8px;">
+            <div class="field">
+              <label for="taskDetailPrioritySelect" style="font-weight:600; font-size:12px; color:var(--ink-muted); text-transform:uppercase;">Priorité</label>
+              <select id="taskDetailPrioritySelect" class="task-detail-priority-select" style="width:100%; padding:8px; border:1px solid var(--brand-border); border-radius:6px; background:var(--card-bg); color:var(--ink); font-size:13px; font-weight:500;">
+                <!-- Options populated dynamically -->
+              </select>
+            </div>
+            <div class="field">
+              <label for="taskDetailStatusSelect" style="font-weight:600; font-size:12px; color:var(--ink-muted); text-transform:uppercase;">Statut</label>
+              <select id="taskDetailStatusSelect" class="task-detail-status-select" style="width:100%; padding:8px; border:1px solid var(--brand-border); border-radius:6px; background:var(--card-bg); color:var(--ink); font-size:13px; font-weight:500;">
+                <option value="Not started">Not started</option>
+                <option value="In progress">In progress</option>
+                <option value="Pending">Pending</option>
+                <option value="Blocked">Blocked</option>
+                <option value="Closed">Closed</option>
+              </select>
+            </div>
+            
+            <div class="field" style="margin-top:10px;">
+              <label style="font-weight:600; font-size:12px; color:var(--ink-muted); text-transform:uppercase; display:block; margin-bottom:6px;">Pièces jointes</label>
+              <div id="taskDetailAttachmentsList" class="task-detail-attachments-list" style="display:flex; flex-direction:column; gap:6px; max-height:120px; overflow-y:auto; padding-right:4px;">
+                <!-- Dynamically populated files -->
+              </div>
+              <button type="button" id="taskDetailAttachBtn" class="platform-pill small" style="margin-top:10px; width:100%; text-align:center;">📎 Ajouter un fichier</button>
+              <input type="file" id="taskDetailFileInput" multiple style="display:none;" />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -129,6 +660,142 @@
         <div class="field" style="margin-top:12px">
           <label id="offerPreviewLabel" for="offerPreview">Aperçu, section SIMULATION</label>
           <textarea id="offerPreview" rows="10" readonly></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW, eZmax Offer modal -->
+  <div id="ezmaxOfferModal" class="modal" aria-hidden="true">
+    <div class="backdrop" data-close></div>
+    <div class="dialog" role="dialog" aria-modal="true" style="max-width: 1080px; width: 94vw;">
+      <div class="head">
+        <h3 id="ezmaxOfferTitle">Offre de service eZmax</h3>
+        <button class="close-x" data-close>&times;</button>
+      </div>
+
+      <div class="body ezmax-calculator-layout">
+        <div class="ezmax-calculator-grid">
+          <section class="platform-card ezmax-input-card">
+            <div class="card-head">
+              <h2>Paramètres de la proposition</h2>
+            </div>
+            
+            <div class="field" style="display: flex; flex-direction: column; gap: 6px;">
+              <label style="font-weight: 700; color: var(--ink-muted);">Nom de la compagnie</label>
+              <div class="companyRow" style="display:flex; gap:10px;">
+                <input class="ezmax-company-name" type="text" placeholder="Ex. Agence immobilière" autocomplete="organization" style="flex:1; border:1px solid var(--brand-border); border-radius:4px; padding:8px 12px; background:#fff; color:var(--ink);" />
+                <div class="langToggle" role="radiogroup" aria-label="Langue de l’offre" style="display:flex; border:1px solid var(--brand-border); border-radius:4px; overflow:hidden;">
+                  <button type="button" class="langOpt ezmax-lang-opt isActive" data-offer-lang="fr" style="border:0; padding:6px 12px; cursor:pointer;">FR</button>
+                  <button type="button" class="langOpt ezmax-lang-opt" data-offer-lang="en" style="border:0; padding:6px 12px; cursor:pointer;">EN</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-grid" style="margin-top:12px; display: grid; gap: 6px;">
+              <label class="field" style="display: flex; flex-direction: column; gap: 6px;">
+                <span style="font-weight: 700; color: var(--ink-muted); font-size: 13px;">Agents immobiliers</span>
+                <input class="ezmax-agents" type="number" min="1" max="1250" value="18" inputmode="numeric" style="border:1px solid var(--brand-border); border-radius:4px; padding:8px 12px; background:#fff; color:var(--ink);" />
+              </label>
+            </div>
+            
+            <div class="module-grid" style="margin-top:14px; display:grid; gap:10px;">
+              <label class="module-option" style="display:flex; align-items:center; gap:10px; padding:10px; border:1px solid var(--brand-border); border-radius:4px; cursor:pointer;">
+                <input class="ezmax-include-ezmax" type="checkbox" checked />
+                <span>
+                  <strong>eZmax</strong>
+                  <small class="muted" style="display:block; font-size:11px;">Système principal de courtage</small>
+                </span>
+              </label>
+              <label class="module-option" style="display:flex; align-items:center; gap:10px; padding:10px; border:1px solid var(--brand-border); border-radius:4px; cursor:pointer;">
+                <input class="ezmax-include-edm" type="checkbox" checked />
+                <span>
+                  <strong>GED</strong>
+                  <small class="muted" style="display:block; font-size:11px;">Module documentaire optionnel</small>
+                </span>
+              </label>
+              <label class="module-option" style="display:flex; align-items:center; gap:10px; padding:10px; border:1px solid var(--brand-border); border-radius:4px; cursor:pointer;">
+                <input class="ezmax-include-ezsign" type="checkbox" />
+                <span>
+                  <strong>eZsign</strong>
+                  <small class="muted" style="display:block; font-size:11px;">Module de signature optionnel</small>
+                </span>
+              </label>
+            </div>
+            
+            <div class="output-options" style="margin-top:14px; display:flex; gap:20px;">
+              <label class="feature-option" style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input class="ezmax-output-word" type="checkbox" checked />
+                <span>Word</span>
+              </label>
+              <label class="feature-option" style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input class="ezmax-output-pdf" type="checkbox" checked />
+                <span>PDF</span>
+              </label>
+            </div>
+            
+            <div class="actions" style="margin-top:18px; display:flex; gap:10px;">
+              <button class="primary-action ezmax-generate-btn" type="button">Générer Word + PDF</button>
+              <button class="platform-pill ezmax-reset-btn" type="button">Réinitialiser</button>
+            </div>
+            
+            <p class="ezmax-status" role="status" aria-live="polite" style="margin-top:10px; font-weight:bold;"></p>
+          </section>
+          
+          <section class="platform-card ezmax-summary-card">
+            <div class="card-head">
+              <h2>Résumé mensuel</h2>
+              <span class="ezmax-tier-badge score-pill score-good" style="font-size:11px;">11 - 20 agents</span>
+            </div>
+            
+            <div class="kpi-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:14px;">
+              <div class="kpi" style="padding:8px; border:1px solid var(--brand-border); border-radius:4px; text-align:center;">
+                <span class="muted" style="font-size:11px; display:block;">Installation</span>
+                <strong class="ezmax-setup-cost">1 500,00 $</strong>
+              </div>
+              <div class="kpi" style="padding:8px; border:1px solid var(--brand-border); border-radius:4px; text-align:center;">
+                <span class="muted" style="font-size:11px; display:block;">Mensuel</span>
+                <strong class="ezmax-monthly-total" style="color:var(--brand-primary)">475,86 $</strong>
+              </div>
+              <div class="kpi" style="padding:8px; border:1px solid var(--brand-border); border-radius:4px; text-align:center;">
+                <span class="muted" style="font-size:11px; display:block;">Par agent</span>
+                <strong class="ezmax-average-cost">26,44 $</strong>
+              </div>
+            </div>
+            
+            <div class="ezmax-line-items" style="display:grid; gap:8px; margin-top:14px;"></div>
+          </section>
+          
+          <section class="platform-card ezmax-details-card" style="grid-column:1 / -1; margin-top:14px;">
+            <div class="card-head">
+              <h2>Aperçu du calcul</h2>
+            </div>
+            <pre class="ezmax-calculation-preview" style="background:var(--brand-soft); border:1px solid var(--brand-border); border-radius:4px; padding:12px; font-family:monospace; font-size:11px; overflow-x:auto; white-space:pre-wrap; color:var(--ink); margin-top:10px;"></pre>
+          </section>
+          
+          <section class="platform-card ezmax-pricing-card" style="grid-column:1 / -1; margin-top:14px;">
+            <div class="card-head">
+              <h2>Tableau de tarification</h2>
+            </div>
+            <div class="dashboard-table" style="margin-top:10px; padding:0; border:0;">
+              <table class="ezmax-pricing-table" style="width:100%; border-collapse:collapse; font-size:12px;">
+                <thead>
+                  <tr>
+                    <th>Agents</th>
+                    <th>Inclus</th>
+                    <th>eZmax</th>
+                    <th>TPASI</th>
+                    <th>GED</th>
+                    <th>TPASI</th>
+                    <th>eZsign</th>
+                    <th>TPASI</th>
+                    <th>Admins</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </section>
         </div>
       </div>
     </div>
@@ -232,10 +899,13 @@
     </div>
   </div>
 
-  <script src="./config.js?v=1.0"></script>
-  <script src="./auth.js?v=1.2"></script>
-  <script src="./app.js?v=2.6"></script>
-  <script src="./meeting-ai.js?v=1.6"></script>
+  <script src="./config.js?v=1.1"></script>
+  <script src="./auth.js?v=1.6"></script>
+  <script src="./app.js?v=2.7"></script>
+  <script src="./meeting-ai.js?v=1.8"></script>
+  <script src="./chat.js?v=1.2"></script>
+  <script src="./tasks.js?v=1.0"></script>
+  <script src="./shell.js?v=1.5"></script>
 </body>
 </html>
 

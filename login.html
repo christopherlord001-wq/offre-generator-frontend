@@ -4,28 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Connexion eZsign</title>
-  <link rel="stylesheet" href="style.css?v=2.6" />
+  <link rel="stylesheet" href="style.css?v=3.4" />
 </head>
 <body class="login-page">
   <main class="login-shell">
     <section class="login-card">
-      <div class="login-brand">ez</div>
-      <h1>Connexion</h1>
-      <form id="loginForm" class="login-form" method="post" action="/api/auth/login">
-        <label>
-          Email
-          <input id="loginEmail" type="email" autocomplete="username" required />
-        </label>
-        <label>
-          Mot de passe
-          <input id="loginPassword" type="password" autocomplete="current-password" required />
-        </label>
-        <button id="loginSubmit" class="btn" type="submit">Se connecter</button>
-        <p id="loginError" class="login-error" role="alert"></p>
-      </form>
+      <div class="login-panel">
+        <img class="login-logo-img" src="/logo-ezsign.png" alt="eZsign" />
+        <h1>Connexion</h1>
+        <form id="loginForm" class="login-form" method="post" action="/api/auth/login">
+          <label>
+            Email
+            <input id="loginEmail" type="email" autocomplete="username" required />
+          </label>
+          <label>
+            Mot de passe
+            <input id="loginPassword" type="password" autocomplete="current-password" required />
+          </label>
+          <button id="loginSubmit" class="btn" type="submit">Se connecter</button>
+          <p id="loginError" class="login-error" role="alert"></p>
+        </form>
+      </div>
+      <div class="login-visual" aria-hidden="true"></div>
     </section>
   </main>
-  <script src="config.js?v=1.0"></script>
+  <script src="config.js?v=1.1"></script>
   <script>
     const CONFIG_API_BASE = String(window.EZSIGN_CONFIG?.apiBaseUrl || '').trim().replace(/\/+$/, '');
     const IS_FILE = window.location.protocol === 'file:';
@@ -33,6 +36,7 @@
     const AUTH_BASE = IS_FILE ? 'http://127.0.0.1:5055' : (IS_GITHUB_PAGES ? CONFIG_API_BASE : '');
     const AUTH_CREDENTIALS = AUTH_BASE ? 'include' : 'same-origin';
     const APP_URL = IS_FILE ? `${AUTH_BASE}/` : (IS_GITHUB_PAGES ? (AUTH_BASE ? `${AUTH_BASE}/` : './') : '/');
+    document.querySelector('.login-logo-img').src = `${AUTH_BASE}/logo-ezsign.png`;
     const form = document.getElementById('loginForm');
     const errorEl = document.getElementById('loginError');
     const button = document.getElementById('loginSubmit');
