@@ -54,19 +54,19 @@
     <aside class="platform-sidebar">
       <nav>
         <button class="side-link active" type="button" data-view-target="home"><span>⌂</span><b data-i18n="navHome">Home</b></button>
-        <button class="side-link has-sub" type="button" data-view-target="tasks-team"><span>☑</span><b data-i18n="navTasks">Tâches</b></button>
-        <div class="side-submenu">
+        <button class="side-link has-sub" type="button" data-view-target="tasks-team" style="display: none;"><span>☑</span><b data-i18n="navTasks">Tâches</b></button>
+        <div class="side-submenu" style="display: none;">
           <button type="button" data-view-target="tasks-team" data-i18n="navTasksTeam">Équipe</button>
           <button type="button" data-view-target="tasks-personal" data-i18n="navTasksPersonal">Mes Tâches</button>
         </div>
         <button class="side-link" type="button" data-view-target="proposals"><span>▤</span><b data-i18n="navProposals">Proposals</b></button>
-        <button class="side-link has-sub" type="button" data-view-target="analysis-dashboard"><span>◎</span><b data-i18n="navAnalysis">Meeting analysis</b></button>
-        <div class="side-submenu">
+        <button class="side-link has-sub" type="button" data-view-target="analysis-dashboard" style="display: none;"><span>◎</span><b data-i18n="navAnalysis">Meeting analysis</b></button>
+        <div class="side-submenu" style="display: none;">
           <button type="button" data-view-target="analysis-dashboard" data-i18n="navAnalysisDashboard">Dashboard</button>
           <button type="button" data-view-target="analysis-new" data-i18n="navAnalysisNew">Analysis</button>
         </div>
         <button class="side-link" type="button" data-view-target="calculator"><span>∑</span><b data-i18n="navCalculator">Calculator</b></button>
-        <button class="side-link" type="button" data-view-target="chat"><span>💬</span><b data-i18n="navChat">AI interne</b></button>
+        <button class="side-link" type="button" data-view-target="chat" style="display: none;"><span>💬</span><b data-i18n="navChat">AI interne</b></button>
         <button class="side-link" type="button" data-view-target="admin"><span>⚙</span><b data-i18n="navAdmin">Administration</b></button>
       </nav>
       <button id="sideThemeBtn" class="side-theme" type="button"><span>☀</span><b data-i18n="themeLight">Light mode</b><i></i></button>
@@ -88,7 +88,7 @@
               <b data-i18n="homeCreateProposal">Create a proposal</b>
               <small data-i18n="homeCreateProposalSub">Generate Word, PDF, or both and keep it in the proposal dashboard.</small>
             </button>
-            <button class="action-row" type="button" data-action="new-analysis">
+            <button class="action-row" type="button" data-action="new-analysis" style="display: none;">
               <span>◎</span>
               <b data-i18n="homeAnalyzeMeeting">Analyze a meeting</b>
               <small data-i18n="homeAnalyzeMeetingSub">Paste a transcript and get a score, summary, objections, and coaching.</small>
