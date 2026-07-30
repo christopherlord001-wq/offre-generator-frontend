@@ -11,7 +11,7 @@
   <title>Calculateur eZsign</title>
 
   <!-- Link to the stylesheet (same folder) -->
-  <link rel="stylesheet" href="style.css?v=3.6" />
+  <link rel="stylesheet" href="style.css?v=3.7" />
 </head>
 <body>
   <div class="appbar legacy-appbar" aria-hidden="true">
@@ -316,15 +316,15 @@
             <div class="ezmax-calculator-grid">
               <section class="platform-card ezmax-input-card">
                 <div class="card-head">
-                  <h2>Paramètres</h2>
+                  <h2 class="ezmax-input-title">Paramètres</h2>
                 </div>
                 <div class="form-grid">
                   <label class="field field-wide" style="display: none;">
-                    <span>Nom de la compagnie</span>
+                    <span class="ezmax-company-label">Nom de la compagnie</span>
                     <input class="ezmax-company-name" type="text" placeholder="Ex. Agence immobilière" autocomplete="organization" />
                   </label>
-                  <label class="field">
-                    <span>Agents immobiliers</span>
+                  <label class="field ezmax-default-users-field" style="display: none;">
+                    <span class="ezmax-default-users-label">Agents immobiliers</span>
                     <input class="ezmax-agents" type="number" min="1" max="1250" value="18" inputmode="numeric" />
                   </label>
                 </div>
@@ -334,22 +334,34 @@
                     <input class="ezmax-include-ezmax" type="checkbox" checked />
                     <span>
                       <strong>eZmax</strong>
-                      <small class="muted">Système principal de courtage</small>
+                      <small class="muted ezmax-desc-ezmax">Système principal de courtage</small>
                     </span>
+                  </label>
+                  <label class="ezmax-module-users">
+                    <span class="ezmax-users-label-ezmax">Utilisateurs eZmax</span>
+                    <input class="ezmax-users-ezmax" type="number" min="1" max="1250" value="18" inputmode="numeric" />
                   </label>
                   <label class="module-option">
                     <input class="ezmax-include-edm" type="checkbox" checked />
                     <span>
-                      <strong>GED</strong>
-                      <small class="muted">Module documentaire optionnel</small>
+                      <strong class="ezmax-name-edm">GED</strong>
+                      <small class="muted ezmax-desc-edm">Module documentaire optionnel</small>
                     </span>
+                  </label>
+                  <label class="ezmax-module-users">
+                    <span class="ezmax-users-label-edm">Utilisateurs GED</span>
+                    <input class="ezmax-users-edm" type="number" min="1" max="1250" value="18" inputmode="numeric" />
                   </label>
                   <label class="module-option">
                     <input class="ezmax-include-ezsign" type="checkbox" />
                     <span>
                       <strong>eZsign</strong>
-                      <small class="muted">Module de signature optionnel</small>
+                      <small class="muted ezmax-desc-ezsign">Module de signature optionnel</small>
                     </span>
+                  </label>
+                  <label class="ezmax-module-users">
+                    <span class="ezmax-users-label-ezsign">Utilisateurs eZsign</span>
+                    <input class="ezmax-users-ezsign" type="number" min="1" max="1250" value="18" inputmode="numeric" />
                   </label>
                 </div>
                 
@@ -360,21 +372,21 @@
               
               <section class="platform-card ezmax-summary-card">
                 <div class="card-head">
-                  <h2>Résumé mensuel</h2>
+                  <h2 class="ezmax-summary-title">Résumé mensuel</h2>
                   <span class="ezmax-tier-badge score-pill score-good" style="font-size: 11px;">11 - 20 agents</span>
                 </div>
                 
                 <div class="kpi-grid">
                   <div class="kpi">
-                    <span class="muted">Frais d'installation</span>
+                    <span class="muted ezmax-setup-label">Frais d'installation</span>
                     <strong class="ezmax-setup-cost">1 500,00 $</strong>
                   </div>
                   <div class="kpi">
-                    <span class="muted">Total mensuel</span>
+                    <span class="muted ezmax-monthly-label">Total mensuel</span>
                     <strong class="ezmax-monthly-total" style="color: var(--brand-primary);">475,86 $</strong>
                   </div>
                   <div class="kpi">
-                    <span class="muted">Par agent</span>
+                    <span class="muted ezmax-average-label">Par agent</span>
                     <strong class="ezmax-average-cost">26,44 $</strong>
                   </div>
                 </div>
@@ -384,28 +396,28 @@
               
               <section class="platform-card ezmax-details-card" style="grid-column: 1 / -1; margin-top: 18px;">
                 <div class="card-head">
-                  <h2>Aperçu du calcul</h2>
+                  <h2 class="ezmax-preview-title">Aperçu du calcul</h2>
                 </div>
                 <pre class="ezmax-calculation-preview" style="background: var(--brand-soft); border: 1px solid var(--brand-border); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; color: var(--ink); margin-top: 10px;"></pre>
               </section>
               
               <section class="platform-card ezmax-pricing-card" style="grid-column: 1 / -1; margin-top: 18px;">
                 <div class="card-head">
-                  <h2>Tableau de tarification du contrat</h2>
+                  <h2 class="ezmax-pricing-title">Tableau de tarification du contrat</h2>
                 </div>
                 <div class="dashboard-table" style="margin-top: 10px; padding: 0; border: 0;">
                   <table class="ezmax-pricing-table" style="width: 100%; border-collapse: collapse;">
                     <thead>
                       <tr>
-                        <th>Agents</th>
-                        <th>Inclus</th>
+                        <th class="ezmax-th-agents">Agents</th>
+                        <th class="ezmax-th-included">Inclus</th>
                         <th>eZmax</th>
-                        <th>eZmax TPASI</th>
-                        <th>GED</th>
-                        <th>GED TPASI</th>
+                        <th class="ezmax-th-ezmax-rparea">eZmax TPASI</th>
+                        <th class="ezmax-th-edm">GED</th>
+                        <th class="ezmax-th-edm-rparea">GED TPASI</th>
                         <th>eZsign</th>
-                        <th>eZsign TPASI</th>
-                        <th>Admins eZsign</th>
+                        <th class="ezmax-th-ezsign-rparea">eZsign TPASI</th>
+                        <th class="ezmax-th-admins">Admins eZsign</th>
                       </tr>
                     </thead>
                     <tbody></tbody>
@@ -678,11 +690,11 @@
         <div class="ezmax-calculator-grid">
           <section class="platform-card ezmax-input-card">
             <div class="card-head">
-              <h2>Paramètres de la proposition</h2>
+              <h2 class="ezmax-input-title">Paramètres de la proposition</h2>
             </div>
             
             <div class="field" style="display: flex; flex-direction: column; gap: 6px;">
-              <label style="font-weight: 700; color: var(--ink-muted);">Nom de la compagnie</label>
+              <label class="ezmax-company-label" style="font-weight: 700; color: var(--ink-muted);">Nom de la compagnie</label>
               <div class="companyRow" style="display:flex; gap:10px;">
                 <input class="ezmax-company-name" type="text" placeholder="Ex. Agence immobilière" autocomplete="organization" style="flex:1; border:1px solid var(--brand-border); border-radius:4px; padding:8px 12px; background:#fff; color:var(--ink);" />
                 <div class="langToggle" role="radiogroup" aria-label="Langue de l’offre" style="display:flex; border:1px solid var(--brand-border); border-radius:4px; overflow:hidden;">
@@ -692,9 +704,9 @@
               </div>
             </div>
 
-            <div class="form-grid" style="margin-top:12px; display: grid; gap: 6px;">
+            <div class="form-grid" style="margin-top:12px; display: none; gap: 6px;">
               <label class="field" style="display: flex; flex-direction: column; gap: 6px;">
-                <span style="font-weight: 700; color: var(--ink-muted); font-size: 13px;">Agents immobiliers</span>
+                <span class="ezmax-default-users-label" style="font-weight: 700; color: var(--ink-muted); font-size: 13px;">Agents immobiliers</span>
                 <input class="ezmax-agents" type="number" min="1" max="1250" value="18" inputmode="numeric" style="border:1px solid var(--brand-border); border-radius:4px; padding:8px 12px; background:#fff; color:var(--ink);" />
               </label>
             </div>
@@ -704,33 +716,45 @@
                 <input class="ezmax-include-ezmax" type="checkbox" checked />
                 <span>
                   <strong>eZmax</strong>
-                  <small class="muted" style="display:block; font-size:11px;">Système principal de courtage</small>
+                  <small class="muted ezmax-desc-ezmax" style="display:block; font-size:11px;">Système principal de courtage</small>
                 </span>
+              </label>
+              <label class="ezmax-module-users">
+                <span class="ezmax-users-label-ezmax">Utilisateurs eZmax</span>
+                <input class="ezmax-users-ezmax" type="number" min="1" max="1250" value="18" inputmode="numeric" />
               </label>
               <label class="module-option" style="display:flex; align-items:center; gap:10px; padding:10px; border:1px solid var(--brand-border); border-radius:4px; cursor:pointer;">
                 <input class="ezmax-include-edm" type="checkbox" checked />
                 <span>
-                  <strong>GED</strong>
-                  <small class="muted" style="display:block; font-size:11px;">Module documentaire optionnel</small>
+                  <strong class="ezmax-name-edm">GED</strong>
+                  <small class="muted ezmax-desc-edm" style="display:block; font-size:11px;">Module documentaire optionnel</small>
                 </span>
+              </label>
+              <label class="ezmax-module-users">
+                <span class="ezmax-users-label-edm">Utilisateurs GED</span>
+                <input class="ezmax-users-edm" type="number" min="1" max="1250" value="18" inputmode="numeric" />
               </label>
               <label class="module-option" style="display:flex; align-items:center; gap:10px; padding:10px; border:1px solid var(--brand-border); border-radius:4px; cursor:pointer;">
                 <input class="ezmax-include-ezsign" type="checkbox" />
                 <span>
                   <strong>eZsign</strong>
-                  <small class="muted" style="display:block; font-size:11px;">Module de signature optionnel</small>
+                  <small class="muted ezmax-desc-ezsign" style="display:block; font-size:11px;">Module de signature optionnel</small>
                 </span>
+              </label>
+              <label class="ezmax-module-users">
+                <span class="ezmax-users-label-ezsign">Utilisateurs eZsign</span>
+                <input class="ezmax-users-ezsign" type="number" min="1" max="1250" value="18" inputmode="numeric" />
               </label>
             </div>
             
             <div class="output-options" style="margin-top:14px; display:flex; gap:20px;">
               <label class="feature-option" style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
                 <input class="ezmax-output-word" type="checkbox" checked />
-                <span>Word</span>
+                <span class="ezmax-output-word-label">Word</span>
               </label>
               <label class="feature-option" style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
                 <input class="ezmax-output-pdf" type="checkbox" checked />
-                <span>PDF</span>
+                <span class="ezmax-output-pdf-label">PDF</span>
               </label>
             </div>
             
@@ -744,21 +768,21 @@
           
           <section class="platform-card ezmax-summary-card">
             <div class="card-head">
-              <h2>Résumé mensuel</h2>
+              <h2 class="ezmax-summary-title">Résumé mensuel</h2>
               <span class="ezmax-tier-badge score-pill score-good" style="font-size:11px;">11 - 20 agents</span>
             </div>
             
             <div class="kpi-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:14px;">
               <div class="kpi" style="padding:8px; border:1px solid var(--brand-border); border-radius:4px; text-align:center;">
-                <span class="muted" style="font-size:11px; display:block;">Installation</span>
+                <span class="muted ezmax-setup-label" style="font-size:11px; display:block;">Installation</span>
                 <strong class="ezmax-setup-cost">1 500,00 $</strong>
               </div>
               <div class="kpi" style="padding:8px; border:1px solid var(--brand-border); border-radius:4px; text-align:center;">
-                <span class="muted" style="font-size:11px; display:block;">Mensuel</span>
+                <span class="muted ezmax-monthly-label" style="font-size:11px; display:block;">Mensuel</span>
                 <strong class="ezmax-monthly-total" style="color:var(--brand-primary)">475,86 $</strong>
               </div>
               <div class="kpi" style="padding:8px; border:1px solid var(--brand-border); border-radius:4px; text-align:center;">
-                <span class="muted" style="font-size:11px; display:block;">Par agent</span>
+                <span class="muted ezmax-average-label" style="font-size:11px; display:block;">Par agent</span>
                 <strong class="ezmax-average-cost">26,44 $</strong>
               </div>
             </div>
@@ -768,28 +792,28 @@
           
           <section class="platform-card ezmax-details-card" style="grid-column:1 / -1; margin-top:14px;">
             <div class="card-head">
-              <h2>Aperçu du calcul</h2>
+              <h2 class="ezmax-preview-title">Aperçu du calcul</h2>
             </div>
             <pre class="ezmax-calculation-preview" style="background:var(--brand-soft); border:1px solid var(--brand-border); border-radius:4px; padding:12px; font-family:monospace; font-size:11px; overflow-x:auto; white-space:pre-wrap; color:var(--ink); margin-top:10px;"></pre>
           </section>
           
           <section class="platform-card ezmax-pricing-card" style="grid-column:1 / -1; margin-top:14px;">
             <div class="card-head">
-              <h2>Tableau de tarification</h2>
+              <h2 class="ezmax-pricing-title">Tableau de tarification</h2>
             </div>
             <div class="dashboard-table" style="margin-top:10px; padding:0; border:0;">
               <table class="ezmax-pricing-table" style="width:100%; border-collapse:collapse; font-size:12px;">
                 <thead>
                   <tr>
-                    <th>Agents</th>
-                    <th>Inclus</th>
+                    <th class="ezmax-th-agents">Agents</th>
+                    <th class="ezmax-th-included">Inclus</th>
                     <th>eZmax</th>
-                    <th>TPASI</th>
-                    <th>GED</th>
-                    <th>TPASI</th>
+                    <th class="ezmax-th-ezmax-rparea">TPASI</th>
+                    <th class="ezmax-th-edm">GED</th>
+                    <th class="ezmax-th-edm-rparea">TPASI</th>
                     <th>eZsign</th>
-                    <th>TPASI</th>
-                    <th>Admins</th>
+                    <th class="ezmax-th-ezsign-rparea">TPASI</th>
+                    <th class="ezmax-th-admins">Admins</th>
                   </tr>
                 </thead>
                 <tbody></tbody>
@@ -901,11 +925,11 @@
 
   <script src="./config.js?v=1.2"></script>
   <script src="./auth.js?v=1.7"></script>
-  <script src="./app.js?v=2.7"></script>
+  <script src="./app.js?v=3.1"></script>
   <script src="./meeting-ai.js?v=1.8"></script>
   <script src="./chat.js?v=1.2"></script>
   <script src="./tasks.js?v=1.0"></script>
-  <script src="./shell.js?v=1.5"></script>
+  <script src="./shell.js?v=1.6"></script>
 </body>
 </html>
 

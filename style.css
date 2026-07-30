@@ -114,6 +114,7 @@ html[data-theme="dark"] .side-theme i:before{left:14px}
 .support-form{display:grid;gap:14px}
 .support-form label{display:grid;gap:6px;color:#4b5563;font-weight:700}
 .calculator-container{max-width:none;margin:0;padding:0}
+
 html[data-theme="dark"] .platform-shell{background:#0a0f1c;color:#e5e7eb}
 html[data-theme="dark"] .platform-card,
 html[data-theme="dark"] .dashboard-table,
@@ -1920,6 +1921,43 @@ html[data-theme="dark"] .ezmax-pricing-table tbody tr:hover {
   margin-top: 2px;
 }
 
+.ezmax-input-card .ezmax-module-users {
+  display: grid;
+  gap: 6px;
+  margin-top: -4px;
+  padding: 0 2px 6px 42px;
+}
+
+.ezmax-input-card .ezmax-module-users span {
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ezmax-input-card .ezmax-module-users input {
+  width: 100%;
+  border: 1px solid var(--brand-border);
+  border-radius: 6px;
+  background: var(--card-bg);
+  color: var(--ink);
+  font: inherit;
+  padding: 9px 10px;
+}
+
+.ezmax-input-card .ezmax-module-users input:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.13);
+  outline: none;
+}
+
+.ezmax-input-card .ezmax-module-users.is-disabled {
+  opacity: 0.55;
+}
+
+.ezmax-input-card .ezmax-module-users input:disabled {
+  cursor: not-allowed;
+}
+
 .ezmax-input-card .actions {
   display: flex;
   gap: 10px;
@@ -2486,5 +2524,3 @@ html[data-theme="dark"] .task-modal-side-col {
   50% { opacity: 1; }
   100% { opacity: 0.6; }
 }
-
-

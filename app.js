@@ -199,7 +199,7 @@
         creatorEmail: 'Courriel',
         simulation: 'Simulation',
         addSimulation: '+ Ajouter une simulation',
-        maxSimulations: 'Maximum 3 simulations',
+        maxSimulations: 'Maximum 6 simulations',
         removeSimulation: 'Retirer',
         accountByFolder: 'Entreprise par envois',
         folderCount: 'Nombre d’envois',
@@ -287,7 +287,7 @@
         creatorEmail: 'Email',
         simulation: 'Simulation',
         addSimulation: '+ Add a simulation',
-        maxSimulations: 'Maximum 3 simulations',
+        maxSimulations: 'Maximum 6 simulations',
         removeSimulation: 'Remove',
         accountByFolder: 'Enterprise per-sent',
         folderCount: 'Number of sends',
@@ -978,7 +978,7 @@
 
     function moneyPlainOffer(n) {
   const s = (Math.round((Number(n) || 0) * 100) / 100).toFixed(2);
-  return (OFFER_LANG === 'fr' ? s.replace('.', ',') : s) + ' $';
+  return OFFER_LANG === 'fr' ? s.replace('.', ',') + ' $' : '$' + s;
 }
 
     function fmtNumberOfferPlain(n) {
@@ -1009,7 +1009,7 @@
 
     function moneyPlain(n) {
       const s = (Math.round((Number(n) || 0) * 100) / 100).toFixed(2);
-      return (LANG === 'fr' ? s.replace('.', ',') : s) + ' $';
+      return LANG === 'fr' ? s.replace('.', ',') + ' $' : '$' + s;
     }
 
 function buildOfferSimulationBlock(planKey, files, users, simulationNumber, totalSimulations) {
@@ -1032,8 +1032,8 @@ function buildOfferSimulationBlock(planKey, files, users, simulationNumber, tota
 
   if (acct.unlimitedUsers) {
     lines.push(OFFER_LANG === 'fr'
-      ? 'Ce compte comprend des utilisateurs illimités. Les frais sont calculés selon les envois manuels et API.'
-      : 'This account includes unlimited users. Fees are calculated based on manual and API sends.');
+      ? 'Ce compte comprend des utilisateurs illimités et des frais fixes mensuels de 222,80 $, même si aucun document n’est envoyé. Les frais variables sont calculés selon les envois manuels et API.'
+      : 'This account includes unlimited users and a fixed monthly base fee of $222.80, even if no documents are sent. Variable fees are calculated based on manual and API sends.');
   } else {
     const includedAtTier = bU.prevLimit;
     const baseTierPrice = acct.base + bU.prevBase;
@@ -1486,6 +1486,7 @@ function buildDiscussAsDiscussedBlock(planKey, apiFiles, users, featureSelection
       { value: 'other', name: '', email: '' },
     ];
 
+    const MAX_OFFER_SIMULATIONS = 6;
     let offerSimulationState = [{ planKey: 'enterprise', files: 0, users: 10, features: null }];
 
     function normalizeOfferSimulation(sim) {
@@ -1519,7 +1520,7 @@ function buildDiscussAsDiscussedBlock(planKey, apiFiles, users, featureSelection
     }
 
     function syncOfferSimulationStateFromDOM() {
-      offerSimulationState = readOfferSimulationsFromDOM().slice(0, 3);
+      offerSimulationState = readOfferSimulationsFromDOM().slice(0, MAX_OFFER_SIMULATIONS);
       if (!offerSimulationState.length) {
         offerSimulationState = [{ planKey: 'enterprise', files: 0, users: 10, features: null }];
       }
@@ -1536,7 +1537,7 @@ function buildDiscussAsDiscussedBlock(planKey, apiFiles, users, featureSelection
     function renderOfferSimulations() {
       if (!offerSimulations) return;
 
-      offerSimulationState = offerSimulationState.map(normalizeOfferSimulation).slice(0, 3);
+      offerSimulationState = offerSimulationState.map(normalizeOfferSimulation).slice(0, MAX_OFFER_SIMULATIONS);
       offerSimulations.innerHTML = offerSimulationState.map((sim, index) => {
         const acct = ACCOUNTS[sim.planKey];
         const fileFieldVisible = hasFilePricing(acct);
@@ -1607,8 +1608,8 @@ function buildDiscussAsDiscussedBlock(planKey, apiFiles, users, featureSelection
       });
 
       if (addSimulationBtn) {
-        addSimulationBtn.disabled = offerSimulationState.length >= 3;
-        addSimulationBtn.textContent = offerSimulationState.length >= 3 ? t[LANG].maxSimulations : t[LANG].addSimulation;
+        addSimulationBtn.disabled = offerSimulationState.length >= MAX_OFFER_SIMULATIONS;
+        addSimulationBtn.textContent = offerSimulationState.length >= MAX_OFFER_SIMULATIONS ? t[LANG].maxSimulations : t[LANG].addSimulation;
       }
     }
 
@@ -2170,7 +2171,7 @@ function setOfferLang(lang){
       if (themeBtn) themeBtn.textContent = THEME === 'dark' ? t[LANG].themeDark : t[LANG].themeLight;
     }
     // Offer language buttons (FR/EN next to company name)
-    document.querySelectorAll('[data-offer-lang]').forEach(btn => {
+    document.querySelectorAll('#offerModal [data-offer-lang]').forEach(btn => {
       btn.addEventListener('click', () => setOfferLang(btn.dataset.offerLang));
     });
 
@@ -2228,7 +2229,7 @@ function setOfferLang(lang){
     if (addSimulationBtn) {
       addSimulationBtn.addEventListener('click', () => {
         syncOfferSimulationStateFromDOM();
-        if (offerSimulationState.length >= 3) return;
+        if (offerSimulationState.length >= MAX_OFFER_SIMULATIONS) return;
         offerSimulationState.push({ planKey: 'enterprise', files: 0, users: 10, features: null });
         renderOfferSimulations();
         updateOfferPreview();
@@ -2399,6 +2400,12 @@ const payload = {
     }));
 
     const activeEzmaxPanels = [];
+    window.ezmaxRefreshPanels = function ezmaxRefreshPanels() {
+      activeEzmaxPanels.forEach(panel => {
+        if (panel && typeof panel.calculate === 'function') panel.calculate();
+      });
+    };
+
     function bindEzmaxPanel(containerId, isProposalBuilder) {
       const container = document.getElementById(containerId);
       if (!container) return;
@@ -2421,10 +2428,18 @@ const payload = {
           pageTitle: 'eZmax Proposal Generator',
           subtitle: 'Calculator and offer builder',
           langButton: 'FR',
+          offerTitle: 'eZmax Proposal Offer',
+          parametersTitle: 'Parameters',
           inputsTitle: 'Proposal Inputs',
           companyName: 'Company name',
           companyPlaceholder: 'Real Estate Advisors',
           agents: 'Real estate agents',
+          defaultUsers: 'Default user count',
+          moduleUsers: {
+            ezmax: 'eZmax users',
+            edm: 'EDM users',
+            ezsign: 'eZsign users',
+          },
           apiUrl: 'Server URL',
           ezmaxDesc: 'Core brokerage system',
           edmName: 'EDM',
@@ -2458,8 +2473,9 @@ const payload = {
           generationDone: 'Proposal generated.',
           generationFailed: 'Generation failed',
           tierSuffix: 'agents',
-          pricingIntro: count => `Pricing calculations are based on ${count} real estate agent${count === 1 ? '' : 's'}.`,
-          serviceLine: (label, count, total) => `- Monthly ${label} fee (${count} agents): ${total}`,
+          agentLabel: count => `${count} agent${count === 1 ? '' : 's'}`,
+          pricingIntro: summary => `Pricing calculations are based on these module user counts: ${summary}.`,
+          serviceLine: (label, count, total) => `- Monthly ${label} fee (${count} agent${count === 1 ? '' : 's'}): ${total}`,
           totalLine: total => `Total monthly recurring fee: ${total}`,
           averageLine: average => `Average monthly recurring cost per agent: ${average}`,
           monthlyFeeTitle: label => `Monthly ${label} Fee`,
@@ -2477,10 +2493,18 @@ const payload = {
           pageTitle: 'Générateur de proposition eZmax',
           subtitle: "Calculateur et générateur d'offre",
           langButton: 'EN',
+          offerTitle: 'Offre de service eZmax',
+          parametersTitle: 'Paramètres',
           inputsTitle: 'Paramètres de la proposition',
           companyName: 'Nom de la compagnie',
           companyPlaceholder: "Ex. Agence immobilière",
           agents: 'Agents immobiliers',
+          defaultUsers: "Nombre d'utilisateurs par défaut",
+          moduleUsers: {
+            ezmax: 'Utilisateurs eZmax',
+            edm: 'Utilisateurs GED',
+            ezsign: 'Utilisateurs eZsign',
+          },
           apiUrl: 'URL du serveur',
           ezmaxDesc: 'Système principal de courtage',
           edmName: 'GED',
@@ -2514,8 +2538,9 @@ const payload = {
           generationDone: 'Proposition générée.',
           generationFailed: 'Échec de la génération',
           tierSuffix: 'agents',
-          pricingIntro: count => `Les calculs de tarification sont basés sur ${count} agent${count === 1 ? '' : 's'} immobilier${count === 1 ? '' : 's'}.`,
-          serviceLine: (label, count, total) => `- Frais mensuels ${label} (${count} agents): ${total}`,
+          agentLabel: count => `${count} agent${count === 1 ? '' : 's'}`,
+          pricingIntro: summary => `Les calculs de tarification utilisent ces nombres d'utilisateurs par module : ${summary}.`,
+          serviceLine: (label, count, total) => `- Frais mensuels ${label} (${count} agent${count === 1 ? '' : 's'}): ${total}`,
           totalLine: total => `Total mensuel récurrent: ${total}`,
           averageLine: average => `Coût mensuel récurrent moyen par agent: ${average}`,
           monthlyFeeTitle: label => `Frais mensuels ${label}`,
@@ -2532,34 +2557,99 @@ const payload = {
       };
 
       const els = {
+        inputTitle: container.querySelector('.ezmax-input-title'),
+        companyLabel: container.querySelector('.ezmax-company-label'),
+        defaultUsersLabel: container.querySelector('.ezmax-default-users-label'),
+        descEzmax: container.querySelector('.ezmax-desc-ezmax'),
+        descEdm: container.querySelector('.ezmax-desc-edm'),
+        descEzsign: container.querySelector('.ezmax-desc-ezsign'),
+        nameEdm: container.querySelector('.ezmax-name-edm'),
         companyName: container.querySelector('.ezmax-company-name'),
         agents: container.querySelector('.ezmax-agents'),
+        usersEzmax: container.querySelector('.ezmax-users-ezmax'),
+        usersEdm: container.querySelector('.ezmax-users-edm'),
+        usersEzsign: container.querySelector('.ezmax-users-ezsign'),
+        usersLabelEzmax: container.querySelector('.ezmax-users-label-ezmax'),
+        usersLabelEdm: container.querySelector('.ezmax-users-label-edm'),
+        usersLabelEzsign: container.querySelector('.ezmax-users-label-ezsign'),
         includeEzmax: container.querySelector('.ezmax-include-ezmax'),
         includeEdm: container.querySelector('.ezmax-include-edm'),
         includeEzsign: container.querySelector('.ezmax-include-ezsign'),
         outputWordCheck: container.querySelector('.ezmax-output-word'),
         outputPdfCheck: container.querySelector('.ezmax-output-pdf'),
+        outputWordLabel: container.querySelector('.ezmax-output-word-label'),
+        outputPdfLabel: container.querySelector('.ezmax-output-pdf-label'),
         generateBtn: container.querySelector('.ezmax-generate-btn'),
         resetBtn: container.querySelector('.ezmax-reset-btn'),
         status: container.querySelector('.ezmax-status'),
+        summaryTitle: container.querySelector('.ezmax-summary-title'),
+        setupLabel: container.querySelector('.ezmax-setup-label'),
+        monthlyLabel: container.querySelector('.ezmax-monthly-label'),
+        averageLabel: container.querySelector('.ezmax-average-label'),
         setupCost: container.querySelector('.ezmax-setup-cost'),
         monthlyTotal: container.querySelector('.ezmax-monthly-total'),
         averageCost: container.querySelector('.ezmax-average-cost'),
         tierBadge: container.querySelector('.ezmax-tier-badge'),
         lineItems: container.querySelector('.ezmax-line-items'),
+        previewTitle: container.querySelector('.ezmax-preview-title'),
+        pricingTitle: container.querySelector('.ezmax-pricing-title'),
         calculationPreview: container.querySelector('.ezmax-calculation-preview'),
         pricingTable: container.querySelector('.ezmax-pricing-table'),
       };
 
-      let localLang = LANG || 'fr';
+      let localLang = isProposalBuilder
+        ? (container.querySelector('.ezmax-lang-opt.isActive')?.dataset.offerLang || 'fr')
+        : LANG;
       let isGenerating = false;
 
-      function getLang() {
+      function getUiLang() {
+        return LANG;
+      }
+
+      function getOfferLang() {
         return isProposalBuilder ? localLang : LANG;
       }
 
-      function money(val) {
-        return new Intl.NumberFormat(getLang() === 'fr' ? 'fr-CA' : 'en-CA', {
+      function setText(node, text) {
+        if (node) node.textContent = text;
+      }
+
+      function applyEzmaxLabels() {
+        const t = UI[getUiLang()];
+        setText(els.inputTitle, isProposalBuilder ? t.inputsTitle : t.parametersTitle);
+        setText(els.companyLabel, t.companyName);
+        setText(els.defaultUsersLabel, t.defaultUsers);
+        setText(els.descEzmax, t.ezmaxDesc);
+        setText(els.descEdm, t.edmDesc);
+        setText(els.descEzsign, t.ezsignDesc);
+        setText(els.nameEdm, t.edmName);
+        setText(els.usersLabelEzmax, t.moduleUsers.ezmax);
+        setText(els.usersLabelEdm, t.moduleUsers.edm);
+        setText(els.usersLabelEzsign, t.moduleUsers.ezsign);
+        setText(els.outputWordLabel, t.outputWord);
+        setText(els.outputPdfLabel, t.outputPdf);
+        setText(els.summaryTitle, t.summaryTitle);
+        setText(els.setupLabel, t.setupCost);
+        setText(els.monthlyLabel, t.monthlyTotal);
+        setText(els.averageLabel, t.averageCost);
+        setText(els.previewTitle, t.previewTitle);
+        setText(els.pricingTitle, t.pricingTitle);
+        setText(container.querySelector('#ezmaxOfferTitle'), t.offerTitle);
+        if (els.resetBtn) els.resetBtn.textContent = t.reset;
+        if (els.companyName) els.companyName.placeholder = t.companyPlaceholder;
+        if (els.pricingTable) {
+          setText(els.pricingTable.querySelector('.ezmax-th-agents'), t.agentsHeader);
+          setText(els.pricingTable.querySelector('.ezmax-th-included'), t.includedHeader);
+          setText(els.pricingTable.querySelector('.ezmax-th-ezmax-rparea'), 'eZmax ' + t.rparea);
+          setText(els.pricingTable.querySelector('.ezmax-th-edm'), t.edmHeader);
+          setText(els.pricingTable.querySelector('.ezmax-th-edm-rparea'), t.edmHeader + ' ' + t.rparea);
+          setText(els.pricingTable.querySelector('.ezmax-th-ezsign-rparea'), 'eZsign ' + t.rparea);
+          setText(els.pricingTable.querySelector('.ezmax-th-admins'), t.adminsHeader);
+        }
+      }
+
+      function money(val, lang = getUiLang()) {
+        return new Intl.NumberFormat(lang === 'fr' ? 'fr-CA' : 'en-CA', {
           style: 'currency',
           currency: 'CAD',
         }).format(Number(val) || 0);
@@ -2570,7 +2660,11 @@ const payload = {
       }
 
       function tierLabel(tier) {
-        return getLang() === 'fr' ? tier.label.replace(' - ', ' à ') : tier.label;
+        return tierLabelByLang(tier, getUiLang());
+      }
+
+      function tierLabelByLang(tier, lang) {
+        return lang === 'fr' ? tier.label.replace(' - ', ' à ') : tier.label;
       }
 
       function findTier(agents) {
@@ -2585,7 +2679,67 @@ const payload = {
         ].filter(([, selected]) => selected).map(([key]) => key);
       }
 
-      function componentBreakdown(key, agents) {
+      function moduleInput(key) {
+        return {
+          ezmax: els.usersEzmax,
+          edm: els.usersEdm,
+          ezsign: els.usersEzsign,
+        }[key] || els.agents;
+      }
+
+      function moduleCheck(key) {
+        return {
+          ezmax: els.includeEzmax,
+          edm: els.includeEdm,
+          ezsign: els.includeEzsign,
+        }[key] || null;
+      }
+
+      function clampAgents(value, fallback) {
+        const parsed = Math.floor(Number(value) || fallback || 18);
+        return Math.max(1, Math.min(MAX_AGENTS, parsed));
+      }
+
+      function defaultAgents() {
+        return clampAgents(els.agents ? els.agents.value : 18, 18);
+      }
+
+      function moduleUsers(key) {
+        const input = moduleInput(key);
+        const bounded = clampAgents(input ? input.value : defaultAgents(), defaultAgents());
+        if (input && String(input.value) !== String(bounded)) input.value = bounded;
+        return bounded;
+      }
+
+      function selectedComponentUsers(selected) {
+        return selected.reduce((acc, key) => {
+          acc[key] = moduleUsers(key);
+          return acc;
+        }, {});
+      }
+
+      function primaryAgentCount(componentUsers) {
+        const values = Object.values(componentUsers).map(value => clampAgents(value, 1));
+        return values.length ? Math.max(...values) : defaultAgents();
+      }
+
+      function userSummary(items, lang = getUiLang()) {
+        const t = UI[lang];
+        return items.map(item => `${UI[lang].components[item.key]}: ${t.agentLabel(item.agents)}`).join(', ');
+      }
+
+      function syncModuleUserState() {
+        ['ezmax', 'edm', 'ezsign'].forEach(key => {
+          const input = moduleInput(key);
+          const check = moduleCheck(key);
+          const wrapper = input ? input.closest('.ezmax-module-users') : null;
+          const enabled = !!(check && check.checked);
+          if (input) input.disabled = !enabled;
+          if (wrapper) wrapper.classList.toggle('is-disabled', !enabled);
+        });
+      }
+
+      function componentBreakdown(key, agents, lang = getUiLang()) {
         const tier = findTier(agents);
         const [base, rate] = tier[key];
         const extraAgents = Math.max(0, agents - tier.included);
@@ -2594,7 +2748,8 @@ const payload = {
 
         return {
           key,
-          label: UI[getLang()].components[key],
+          label: UI[lang].components[key],
+          agents,
           tier,
           base,
           rate,
@@ -2605,23 +2760,26 @@ const payload = {
         };
       }
 
-      function formulaLine(item, agents) {
+      function formulaLine(item, lang = getUiLang()) {
+        const agents = item.agents;
         if (item.rate === 0) {
-          return money(item.base) + ' = ' + money(item.total);
+          return money(item.base, lang) + ' = ' + money(item.total, lang);
         }
-        return money(item.base) + ' + ((' + agents + ' - ' + item.tier.included + ') x ' + money(item.rate) + ') = ' + money(item.total);
+        return money(item.base, lang) + ' + ((' + agents + ' - ' + item.tier.included + ') x ' + money(item.rate, lang) + ') = ' + money(item.total, lang);
       }
 
-      function detailBlock(item, agents) {
-        const t = UI[getLang()];
+      function detailBlock(item, lang = getOfferLang()) {
+        const t = UI[lang];
+        const label = UI[lang].components[item.key];
+        const agents = item.agents;
         const lines = [];
-        lines.push(t.monthlyFeeTitle(item.label));
-        lines.push(t.subscriptionLine(agents, tierLabel(item.tier)));
+        lines.push(t.monthlyFeeTitle(label));
+        lines.push(t.subscriptionLine(agents, tierLabelByLang(item.tier, lang)));
 
         if (item.rate === 0) {
-          lines.push(t.noRateLine(money(item.base)));
+          lines.push(t.noRateLine(money(item.base, lang)));
         } else {
-          lines.push(t.rateLine(money(item.base), item.tier.included, money(item.rate)));
+          lines.push(t.rateLine(money(item.base, lang), item.tier.included, money(item.rate, lang)));
         }
 
         if (item.key === 'edm') {
@@ -2634,49 +2792,52 @@ const payload = {
         }
 
         lines.push(t.detailedCalc);
-        lines.push(formulaLine(item, agents));
-        lines.push(t.avgPerAgent(money(item.average)));
+        lines.push(formulaLine(item, lang));
+        lines.push(t.avgPerAgent(money(item.average, lang)));
         return lines.join('\n');
       }
 
-      function renderPricingTable(activeTier) {
+      function renderPricingTable(activeTierLabels) {
         if (!els.pricingTable) return;
         const tbody = els.pricingTable.querySelector('tbody');
         if (!tbody) return;
+        const lang = getUiLang();
         tbody.innerHTML = TIERS.map(tier => `
-          <tr class="${tier.label === activeTier.label ? 'active' : ''}">
-            <td>${tierLabel(tier)}</td>
+          <tr class="${activeTierLabels && activeTierLabels.has(tier.label) ? 'active' : ''}">
+            <td>${tierLabelByLang(tier, lang)}</td>
             <td>${tier.included}</td>
-            <td>${money(tier.ezmax[0])}</td>
-            <td>${money(tier.ezmax[1])}</td>
-            <td>${money(tier.edm[0])}</td>
-            <td>${money(tier.edm[1])}</td>
-            <td>${money(tier.ezsign[0])}</td>
-            <td>${money(tier.ezsign[1])}</td>
+            <td>${money(tier.ezmax[0], lang)}</td>
+            <td>${money(tier.ezmax[1], lang)}</td>
+            <td>${money(tier.edm[0], lang)}</td>
+            <td>${money(tier.edm[1], lang)}</td>
+            <td>${money(tier.ezsign[0], lang)}</td>
+            <td>${money(tier.ezsign[1], lang)}</td>
             <td>${tier.admins}</td>
           </tr>
         `).join('');
       }
 
       function calculate() {
-        const langCode = getLang();
-        const t = UI[langCode];
-        const agents = Math.max(1, Math.floor(Number(els.agents ? els.agents.value : 18) || 18));
-        const boundedAgents = Math.min(agents, MAX_AGENTS);
-        if (els.agents && String(els.agents.value) !== String(boundedAgents)) {
-          els.agents.value = boundedAgents;
-        }
-
+        applyEzmaxLabels();
+        const uiLang = getUiLang();
+        const offerLang = getOfferLang();
+        const t = UI[uiLang];
+        const offerT = UI[offerLang];
         const selected = selectedComponents();
-        const tier = findTier(boundedAgents);
-        const items = selected.map(key => componentBreakdown(key, boundedAgents));
+        syncModuleUserState();
+        const componentUsers = selectedComponentUsers(selected);
+        const primaryAgents = primaryAgentCount(componentUsers);
+        const tier = findTier(primaryAgents);
+        const items = selected.map(key => componentBreakdown(key, componentUsers[key], uiLang));
+        const previewItems = selected.map(key => componentBreakdown(key, componentUsers[key], offerLang));
+        const activeTierLabels = new Set(items.map(item => item.tier.label));
         const monthlyTotal = roundMoney(items.reduce((sum, item) => sum + item.total, 0));
-        const average = selected.length ? roundMoney(monthlyTotal / boundedAgents) : 0;
+        const average = selected.length ? roundMoney(monthlyTotal / primaryAgents) : 0;
 
-        if (els.setupCost) els.setupCost.textContent = money(SETUP_COST);
-        if (els.monthlyTotal) els.monthlyTotal.textContent = money(monthlyTotal);
-        if (els.averageCost) els.averageCost.textContent = money(average);
-        if (els.tierBadge) els.tierBadge.textContent = tierLabel(tier) + ' ' + t.tierSuffix;
+        if (els.setupCost) els.setupCost.textContent = money(SETUP_COST, uiLang);
+        if (els.monthlyTotal) els.monthlyTotal.textContent = money(monthlyTotal, uiLang);
+        if (els.averageCost) els.averageCost.textContent = money(average, uiLang);
+        if (els.tierBadge) els.tierBadge.textContent = tierLabelByLang(tier, uiLang) + ' ' + t.tierSuffix;
 
         if (els.lineItems) {
           els.lineItems.innerHTML = items.length
@@ -2684,30 +2845,30 @@ const payload = {
                 <div class="lineItem">
                   <div>
                     <strong>${item.label}</strong>
-                    <span>${formulaLine(item, boundedAgents)}</span>
+                    <span>${t.agentLabel(item.agents)} · ${formulaLine(item, uiLang)}</span>
                   </div>
-                  <strong>${money(item.total)}</strong>
+                  <strong>${money(item.total, uiLang)}</strong>
                 </div>
               `).join('')
             : `<div class="lineItem"><span>${t.noComponent}</span><strong>-</strong></div>`;
         }
 
         const preview = [];
-        preview.push(t.pricingIntro(boundedAgents));
+        preview.push(offerT.pricingIntro(previewItems.length ? userSummary(previewItems, offerLang) : '-'));
         preview.push("");
-        preview.push(t.selectedServices);
-        if (items.length) {
-          items.forEach(item => preview.push(t.serviceLine(item.label, boundedAgents, money(item.total))));
-          preview.push(t.totalLine(money(monthlyTotal)));
-          preview.push(t.averageLine(money(average)));
+        preview.push(offerT.selectedServices);
+        if (previewItems.length) {
+          previewItems.forEach(item => preview.push(offerT.serviceLine(item.label, item.agents, money(item.total, offerLang))));
+          preview.push(offerT.totalLine(money(monthlyTotal, offerLang)));
+          preview.push(offerT.averageLine(money(average, offerLang)));
         } else {
-          preview.push(t.noComponentPreview);
+          preview.push(offerT.noComponentPreview);
         }
         preview.push("");
-        preview.push(items.map(item => detailBlock(item, boundedAgents)).join('\n\n'));
+        preview.push(previewItems.map(item => detailBlock(item, offerLang)).join('\n\n'));
         if (els.calculationPreview) els.calculationPreview.textContent = preview.join('\n');
 
-        renderPricingTable(tier);
+        renderPricingTable(activeTierLabels);
         
         if (els.generateBtn) {
           const formats = outputFormats();
@@ -2724,7 +2885,7 @@ const payload = {
       }
 
       function generateButtonLabel() {
-        const t = UI[getLang()];
+        const t = UI[getUiLang()];
         const formats = outputFormats();
         if (formats.word && formats.pdf) return t.generateWordPdf;
         if (formats.word) return t.generateWordOnly;
@@ -2751,8 +2912,8 @@ const payload = {
         return d;
       }
 
-      function formatDate(date) {
-        return date.toLocaleDateString(getLang() === 'fr' ? 'fr-CA' : 'en-CA', {
+      function formatDate(date, lang = getOfferLang()) {
+        return date.toLocaleDateString(lang === 'fr' ? 'fr-CA' : 'en-CA', {
           year: 'numeric',
           month: 'long',
           day: 'numeric',
@@ -2760,8 +2921,8 @@ const payload = {
       }
 
       async function generateProposal() {
-        const langCode = getLang();
-        const t = UI[langCode];
+        const langCode = getOfferLang();
+        const t = UI[getUiLang()];
         const companyName = els.companyName ? els.companyName.value.trim() : "";
         if (!companyName) {
           setStatus(t.generationNeedName, 'error');
@@ -2782,18 +2943,23 @@ const payload = {
           return;
         }
 
-        const agents = Math.max(1, Math.min(MAX_AGENTS, Math.floor(Number(els.agents ? els.agents.value : 18) || 18)));
+        const componentUsers = selectedComponentUsers(selected);
+        const agents = primaryAgentCount(componentUsers);
         const today = new Date();
         const validUntil = addMonthsSafe(today, 3);
 
         const payload = {
           companyName,
           agents,
+          componentUsers,
+          ezmaxUsers: componentUsers.ezmax,
+          edmUsers: componentUsers.edm,
+          ezsignUsers: componentUsers.ezsign,
           includeEzmax: !!(els.includeEzmax && els.includeEzmax.checked),
           includeEdm: !!(els.includeEdm && els.includeEdm.checked),
           includeEzsign: !!(els.includeEzsign && els.includeEzsign.checked),
-          date: formatDate(today),
-          validUntil: formatDate(validUntil),
+          date: formatDate(today, langCode),
+          validUntil: formatDate(validUntil, langCode),
           lang: langCode,
           outputFormats: formats,
         };
@@ -2874,6 +3040,9 @@ const payload = {
       function resetForm() {
         if (els.companyName) els.companyName.value = '';
         if (els.agents) els.agents.value = 18;
+        if (els.usersEzmax) els.usersEzmax.value = 18;
+        if (els.usersEdm) els.usersEdm.value = 18;
+        if (els.usersEzsign) els.usersEzsign.value = 18;
         if (els.includeEzmax) els.includeEzmax.checked = true;
         if (els.includeEdm) els.includeEdm.checked = true;
         if (els.includeEzsign) els.includeEzsign.checked = false;
@@ -2883,7 +3052,7 @@ const payload = {
         calculate();
       }
 
-      const triggerFields = ['agents', 'includeEzmax', 'includeEdm', 'includeEzsign', 'outputWordCheck', 'outputPdfCheck'];
+      const triggerFields = ['agents', 'usersEzmax', 'usersEdm', 'usersEzsign', 'includeEzmax', 'includeEdm', 'includeEzsign', 'outputWordCheck', 'outputPdfCheck'];
       triggerFields.forEach(id => {
         if (els[id]) {
           els[id].addEventListener('input', calculate);
@@ -2904,7 +3073,11 @@ const payload = {
         langBtns.forEach(btn => {
           btn.addEventListener('click', () => {
             localLang = btn.dataset.offerLang;
-            langBtns.forEach(b => b.classList.toggle('isActive', b.dataset.offerLang === localLang));
+            langBtns.forEach(b => {
+              const active = b.dataset.offerLang === localLang;
+              b.classList.toggle('isActive', active);
+              b.setAttribute('aria-checked', active ? 'true' : 'false');
+            });
             calculate();
           });
         });
@@ -2912,15 +3085,7 @@ const payload = {
 
       const panelInstance = {
         updateLanguage(lang) {
-          if (!isProposalBuilder) {
-            calculate();
-          } else {
-            const offerTitle = container.querySelector('#ezmaxOfferTitle');
-            if (offerTitle) {
-              offerTitle.textContent = lang === 'fr' ? 'Offre de service eZmax' : 'eZmax Proposal Offer';
-            }
-            calculate();
-          }
+          calculate();
         },
         calculate
       };

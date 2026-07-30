@@ -437,20 +437,28 @@
   function dockProposalBuilder() {
     const mount = $('proposalBuilderMount');
     if (!mount) return;
-    
-    // Clear mount first
-    mount.innerHTML = '';
-    
+
     const activeBrand = window.ezAuth?.user?.activeBrand || 'ezsign';
+    const ezmaxModal = $('ezmaxOfferModal');
+    const ezsignModal = $('offerModal');
+    mount.replaceChildren();
+
     if (activeBrand === 'ezmax') {
-      const modal = $('ezmaxOfferModal');
-      if (!modal) return;
+      const modal = ezmaxModal;
+      if (!modal) {
+        mount.textContent = 'eZmax proposal builder is not available on this page.';
+        return;
+      }
       mount.appendChild(modal);
       modal.classList.add('open', 'docked-modal');
       modal.setAttribute('aria-hidden', 'false');
+      if (window.ezmaxRefreshPanels) window.ezmaxRefreshPanels();
     } else {
-      const modal = $('offerModal');
-      if (!modal) return;
+      const modal = ezsignModal;
+      if (!modal) {
+        mount.textContent = 'Proposal builder is not available on this page.';
+        return;
+      }
       mount.appendChild(modal);
       modal.classList.add('open', 'docked-modal');
       modal.setAttribute('aria-hidden', 'false');
