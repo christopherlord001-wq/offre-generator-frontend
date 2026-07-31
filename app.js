@@ -2455,6 +2455,7 @@ const payload = {
           generating: 'Generating...',
           reset: 'Reset',
           summaryTitle: 'Monthly Summary',
+          setupInput: 'Implementation cost',
           setupCost: 'Setup cost',
           monthlyTotal: 'Monthly total',
           averageCost: 'Per agent',
@@ -2520,6 +2521,7 @@ const payload = {
           generating: 'Génération...',
           reset: 'Réinitialiser',
           summaryTitle: 'Résumé mensuel',
+          setupInput: "Frais d'installation",
           setupCost: "Frais d'installation",
           monthlyTotal: 'Total mensuel',
           averageCost: 'Par agent',
@@ -2583,6 +2585,8 @@ const payload = {
         resetBtn: container.querySelector('.ezmax-reset-btn'),
         status: container.querySelector('.ezmax-status'),
         summaryTitle: container.querySelector('.ezmax-summary-title'),
+        setupInputLabel: container.querySelector('.ezmax-setup-input-label'),
+        setupInput: container.querySelector('.ezmax-setup-input'),
         setupLabel: container.querySelector('.ezmax-setup-label'),
         monthlyLabel: container.querySelector('.ezmax-monthly-label'),
         averageLabel: container.querySelector('.ezmax-average-label'),
@@ -2629,6 +2633,7 @@ const payload = {
         setText(els.outputWordLabel, t.outputWord);
         setText(els.outputPdfLabel, t.outputPdf);
         setText(els.summaryTitle, t.summaryTitle);
+        setText(els.setupInputLabel, t.setupInput);
         setText(els.setupLabel, t.setupCost);
         setText(els.monthlyLabel, t.monthlyTotal);
         setText(els.averageLabel, t.averageCost);
@@ -2657,6 +2662,25 @@ const payload = {
 
       function roundMoney(value) {
         return Math.round((Number(value) || 0) * 100) / 100;
+      }
+
+      function cleanSetupCostText(value) {
+        const normalized = String(value ?? '').replace(',', '.').replace(/[^\d.]/g, '');
+        const parts = normalized.split('.');
+        return parts.length <= 1 ? parts[0] : parts[0] + '.' + parts.slice(1).join('');
+      }
+
+      function sanitizeSetupCostInput() {
+        if (!els.setupInput) return;
+        const cleaned = cleanSetupCostText(els.setupInput.value);
+        if (els.setupInput.value !== cleaned) els.setupInput.value = cleaned;
+      }
+
+      function setupCostValue() {
+        if (!els.setupInput) return SETUP_COST;
+        sanitizeSetupCostInput();
+        const parsed = Number(els.setupInput.value);
+        return Number.isFinite(parsed) && parsed >= 0 ? roundMoney(parsed) : 0;
       }
 
       function tierLabel(tier) {
@@ -2831,10 +2855,11 @@ const payload = {
         const items = selected.map(key => componentBreakdown(key, componentUsers[key], uiLang));
         const previewItems = selected.map(key => componentBreakdown(key, componentUsers[key], offerLang));
         const activeTierLabels = new Set(items.map(item => item.tier.label));
+        const setupCost = setupCostValue();
         const monthlyTotal = roundMoney(items.reduce((sum, item) => sum + item.total, 0));
         const average = selected.length ? roundMoney(monthlyTotal / primaryAgents) : 0;
 
-        if (els.setupCost) els.setupCost.textContent = money(SETUP_COST, uiLang);
+        if (els.setupCost) els.setupCost.textContent = money(setupCost, uiLang);
         if (els.monthlyTotal) els.monthlyTotal.textContent = money(monthlyTotal, uiLang);
         if (els.averageCost) els.averageCost.textContent = money(average, uiLang);
         if (els.tierBadge) els.tierBadge.textContent = tierLabelByLang(tier, uiLang) + ' ' + t.tierSuffix;
@@ -2955,6 +2980,7 @@ const payload = {
           ezmaxUsers: componentUsers.ezmax,
           edmUsers: componentUsers.edm,
           ezsignUsers: componentUsers.ezsign,
+          setupCost: setupCostValue(),
           includeEzmax: !!(els.includeEzmax && els.includeEzmax.checked),
           includeEdm: !!(els.includeEdm && els.includeEdm.checked),
           includeEzsign: !!(els.includeEzsign && els.includeEzsign.checked),
@@ -3043,6 +3069,7 @@ const payload = {
         if (els.usersEzmax) els.usersEzmax.value = 18;
         if (els.usersEdm) els.usersEdm.value = 18;
         if (els.usersEzsign) els.usersEzsign.value = 18;
+        if (els.setupInput) els.setupInput.value = String(SETUP_COST);
         if (els.includeEzmax) els.includeEzmax.checked = true;
         if (els.includeEdm) els.includeEdm.checked = true;
         if (els.includeEzsign) els.includeEzsign.checked = false;
@@ -3052,7 +3079,7 @@ const payload = {
         calculate();
       }
 
-      const triggerFields = ['agents', 'usersEzmax', 'usersEdm', 'usersEzsign', 'includeEzmax', 'includeEdm', 'includeEzsign', 'outputWordCheck', 'outputPdfCheck'];
+      const triggerFields = ['agents', 'usersEzmax', 'usersEdm', 'usersEzsign', 'setupInput', 'includeEzmax', 'includeEdm', 'includeEzsign', 'outputWordCheck', 'outputPdfCheck'];
       triggerFields.forEach(id => {
         if (els[id]) {
           els[id].addEventListener('input', calculate);

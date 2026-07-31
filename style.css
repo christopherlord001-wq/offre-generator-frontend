@@ -1958,6 +1958,34 @@ html[data-theme="dark"] .ezmax-pricing-table tbody tr:hover {
   cursor: not-allowed;
 }
 
+.ezmax-input-card .ezmax-setup-field {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.ezmax-input-card .ezmax-setup-field span {
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ezmax-input-card .ezmax-setup-field input {
+  width: 100%;
+  border: 1px solid var(--brand-border);
+  border-radius: 6px;
+  background: var(--card-bg);
+  color: var(--ink);
+  font: inherit;
+  padding: 9px 10px;
+}
+
+.ezmax-input-card .ezmax-setup-field input:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.13);
+  outline: none;
+}
+
 .ezmax-input-card .actions {
   display: flex;
   gap: 10px;
