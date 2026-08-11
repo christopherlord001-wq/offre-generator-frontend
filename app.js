@@ -1312,7 +1312,7 @@ const FEATURE_ITEMS = {
   enterprise_custom_domain: {
     fr: 'Domaine personnalisé',
     en: 'Personalised domain',
-    proposal_fr: 'Accès à un domaine personnalisé',
+    proposal_fr: 'Accès aux domaines personnalisés',
     proposal_en: 'Access to a personalised domain',
   },
   enterprise_interface_branding: {
