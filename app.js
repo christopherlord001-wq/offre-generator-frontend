@@ -1068,7 +1068,7 @@ function buildOfferSimulationBlock(planKey, files, users, simulationNumber, tota
     lines.push('');
     lines.push(OFFER_LANG === 'fr' ? 'Calcul détaillé du prix mensuel' : 'Detailed monthly price calculation');
     lines.push(extraUsersAtTier <= 0
-      ? `= ${moneyPlainLocal(baseTierPrice)} = ${moneyPlainLocal(baseTierPrice)}`
+      ? `= ${moneyPlainLocal(baseTierPrice)}`
       : `= ${moneyPlainLocal(baseTierPrice)} + ((${u} − ${includedAtTier}) × ${moneyPlainLocal(bU.rate)}) = ${moneyPlainLocal(baseTierPrice + (extraUsersAtTier * bU.rate))}`);
   }
 
@@ -1095,8 +1095,8 @@ function buildOfferSimulationBlock(planKey, files, users, simulationNumber, tota
           ? `Si vous avez ${fmtNumberLocal(f)} envois par mois, vous êtes dans la fourchette des ${fileRange}.`
           : `If you have ${fmtNumberLocal(f)} sends per month, you are in the ${fileRange} range.`)
       : (OFFER_LANG === 'fr'
-          ? `Si vous avez ${fmtNumberLocal(f)} API, vous êtes dans la fourchette des ${fileRange}.`
-          : `If you have ${fmtNumberLocal(f)} API, you are in the ${fileRange} range.`));
+          ? `Si vous avez ${fmtNumberLocal(f)} dossiers API complétés, vous êtes dans la fourchette des ${fileRange}.`
+          : `If you have ${fmtNumberLocal(f)} completed API folders, you are in the ${fileRange} range.`));
     lines.push('');
 
     if (isPerSentPlan) {
@@ -1184,6 +1184,7 @@ const FEATURE_GROUPS = [
       'enterprise_bulk_sending',
       'enterprise_shared_links',
       'enterprise_sso',
+      'enterprise_custom_domain',
       'enterprise_interface_branding',
       'enterprise_text_zone_recognition',
       'enterprise_role_assignment',
@@ -1307,6 +1308,12 @@ const FEATURE_ITEMS = {
     en: 'SSO',
     proposal_fr: 'Accès au SSO (authentification unique)',
     proposal_en: 'Access to SSO (Single Sign-On)',
+  },
+  enterprise_custom_domain: {
+    fr: 'Domaine personnalisé',
+    en: 'Personalised domain',
+    proposal_fr: 'Accès à un domaine personnalisé',
+    proposal_en: 'Access to a personalised domain',
   },
   enterprise_interface_branding: {
     fr: 'Image de marque dans l’interface',
