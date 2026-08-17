@@ -825,6 +825,156 @@
         </table>`;
     }
 
+    function ezmaxTierLabel(tier, lang = LANG) {
+      return lang === 'fr' ? tier.label.replace(' - ', ' à ') : tier.label;
+    }
+
+    function ezmaxPricingTableHTML(activeTierLabels = new Set()) {
+      const headers = {
+        agents: LANG === 'fr' ? 'Courtiers' : 'Real Estate agents',
+        included: LANG === 'fr' ? 'Courtiers inclus' : 'Included agents',
+        ppcs: LANG === 'fr' ? 'PPCS' : 'RPAREA',
+        admins: LANG === 'fr' ? 'Compte(s) eZsign admin inclus' : 'eZsign admin account(s) included',
+        displays: LANG === 'fr' ? 'Écran(s) e-Z-Display inclus' : 'e-Z-Display screen(s) included',
+      };
+
+      const rows = EZMAX_TIERS.map(tier => `
+        <tr class="${activeTierLabels.has(tier.label) ? 'active' : ''}">
+          <td>${ezmaxTierLabel(tier)}</td>
+          <td>${fmtNumber(tier.included)}</td>
+          <td>${fmtMoney(tier.ezmax[0])}</td>
+          <td>${tier.ezmax[1] ? fmtMoney(tier.ezmax[1]) : '—'}</td>
+          <td>${fmtMoney(tier.edm[0])}</td>
+          <td>${tier.edm[1] ? fmtMoney(tier.edm[1]) : '—'}</td>
+          <td>${fmtMoney(tier.ezsign[0])}</td>
+          <td>${tier.ezsign[1] ? fmtMoney(tier.ezsign[1]) : '—'}</td>
+          <td>${tier.admins}</td>
+          <td>${tier.displays}</td>
+        </tr>
+      `).join('');
+
+      return `
+        <div class="section-title" style="margin:10px 0 6px;font-weight:700;color:var(--ink);">
+          ${LANG === 'fr' ? 'Tarif par courtier' : 'Pricing by real estate agent'}
+        </div>
+        <table class="price-table ezmax-modal-price-table">
+          <thead>
+            <tr>
+              <th>${headers.agents}</th>
+              <th>${headers.included}</th>
+              <th>eZmax</th>
+              <th>eZmax ${headers.ppcs}</th>
+              <th>${LANG === 'fr' ? 'GED' : 'EDM'}</th>
+              <th>${LANG === 'fr' ? 'GED' : 'EDM'} ${headers.ppcs}</th>
+              <th>eZsign</th>
+              <th>eZsign ${headers.ppcs}</th>
+              <th>${headers.admins}</th>
+              <th>${headers.displays}</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    }
+
+    function ezmaxComponentTotal(component, agents) {
+      const safeAgents = Math.max(1, Math.min(1250, Math.floor(Number(agents) || 18)));
+      const tier = EZMAX_TIERS.find(row => safeAgents >= row.min && safeAgents <= row.max) || EZMAX_TIERS[EZMAX_TIERS.length - 1];
+      const [base, rate] = tier[component];
+      return {
+        tier,
+        agents: safeAgents,
+        total: Math.round((base + Math.max(0, safeAgents - tier.included) * rate) * 100) / 100,
+      };
+    }
+
+    function currentEzmaxUsers(selector, fallback = 18) {
+      const input = document.querySelector(`#ezmaxCalculator ${selector}`);
+      return Math.max(1, Math.min(1250, Math.floor(Number(input?.value) || fallback)));
+    }
+
+    function ezmaxDiscountForCompare(ezmaxUsers, ezsignUsers, includeEzmax, includeEzsign) {
+      if (!includeEzmax || !includeEzsign || ezsignUsers < ezmaxUsers) return 0;
+      return Math.round(ezmaxUsers * EZMAX_EZSIGN_FULL_USER_DISCOUNT * 100) / 100;
+    }
+
+    function renderEzmaxPricingModal() {
+      if (!pricingBody || !pricingTitle) return;
+      pricingTitle.textContent = LANG === 'fr' ? 'Tarifs eZmax' : 'eZmax pricing';
+      pricingBody.innerHTML = ezmaxPricingTableHTML();
+    }
+
+    function renderEzmaxCompareModal() {
+      if (!compareBody || !compareTitle) return;
+      compareTitle.textContent = LANG === 'fr' ? 'Comparer les modules eZmax' : 'Compare eZmax modules';
+
+      const includeEzmax = !!document.querySelector('#ezmaxCalculator .ezmax-include-ezmax')?.checked;
+      const includeEdm = !!document.querySelector('#ezmaxCalculator .ezmax-include-edm')?.checked;
+      const includeEzsign = !!document.querySelector('#ezmaxCalculator .ezmax-include-ezsign')?.checked;
+      const ezmaxUsers = currentEzmaxUsers('.ezmax-users-ezmax');
+      const edmUsers = currentEzmaxUsers('.ezmax-users-edm');
+      const ezsignUsers = currentEzmaxUsers('.ezmax-users-ezsign');
+      const modules = [
+        { key: 'ezmax', label: 'eZmax', users: ezmaxUsers, selected: includeEzmax },
+        { key: 'edm', label: LANG === 'fr' ? 'GED' : 'EDM', users: edmUsers, selected: includeEdm },
+        { key: 'ezsign', label: 'eZsign', users: ezsignUsers, selected: includeEzsign },
+      ];
+
+      const rows = modules.map(module => {
+        const result = ezmaxComponentTotal(module.key, module.users);
+        return `
+          <tr class="${module.selected ? 'active' : ''}">
+            <td>${module.label}</td>
+            <td>${fmtNumber(module.users)}</td>
+            <td>${ezmaxTierLabel(result.tier)}</td>
+            <td>${fmtMoney(result.total)}</td>
+            <td>${module.selected ? (LANG === 'fr' ? 'Sélectionné' : 'Selected') : '—'}</td>
+          </tr>`;
+      }).join('');
+
+      const grossSelectedTotal = modules.reduce((sum, module) => (
+        module.selected ? sum + ezmaxComponentTotal(module.key, module.users).total : sum
+      ), 0);
+      const discount = ezmaxDiscountForCompare(ezmaxUsers, ezsignUsers, includeEzmax, includeEzsign);
+      const netTotal = Math.max(0, grossSelectedTotal - discount);
+
+      compareBody.innerHTML = `
+        <table class="price-table ezmax-modal-price-table">
+          <thead>
+            <tr>
+              <th>${LANG === 'fr' ? 'Module' : 'Module'}</th>
+              <th>${LANG === 'fr' ? 'Utilisateurs' : 'Users'}</th>
+              <th>${LANG === 'fr' ? 'Palier' : 'Tier'}</th>
+              <th>${LANG === 'fr' ? 'Frais mensuels' : 'Monthly fee'}</th>
+              <th>${LANG === 'fr' ? 'Statut' : 'Status'}</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <p class="muted" style="margin-top:8px">
+          ${LANG === 'fr' ? 'Comparaison basée sur les champs actuellement affichés dans le calculateur eZmax.' : 'Comparison based on the fields currently shown in the eZmax calculator.'}
+        </p>
+        <p style="font-weight:800; color:var(--brand-primary);">
+          ${discount ? `${LANG === 'fr' ? 'Rabais eZsign appliqué' : 'eZsign discount applied'}: -${fmtMoney(discount)}<br>` : ''}
+          ${LANG === 'fr' ? 'Total mensuel sélectionné' : 'Selected monthly total'}: ${fmtMoney(netTotal)}
+        </p>`;
+    }
+
+    window.ezmaxOpenPricingModal = function ezmaxOpenPricingModal() {
+      renderEzmaxPricingModal();
+      if (pricingModal) {
+        pricingModal.classList.add('open');
+        pricingModal.setAttribute('aria-hidden', 'false');
+      }
+    };
+
+    window.ezmaxOpenCompareModal = function ezmaxOpenCompareModal() {
+      renderEzmaxCompareModal();
+      if (compareModal) {
+        compareModal.classList.add('open');
+        compareModal.setAttribute('aria-hidden', 'false');
+      }
+    };
+
     function renderPricingTables() {
       pricingTitle.textContent = t[LANG].infoTitle;
 
@@ -2407,6 +2557,17 @@ const payload = {
     }));
 
     const activeEzmaxPanels = [];
+    const EZMAX_EZSIGN_FULL_USER_DISCOUNT = 2.00;
+    const EZMAX_TIERS = [
+      { label: '1 - 10', min: 1, max: 10, included: 0, ezmax: [204.40, 0.00], edm: [112.10, 0.00], ezsign: [116.90, 0.00], admins: 1, displays: 1 },
+      { label: '11 - 20', min: 11, max: 20, included: 10, ezmax: [204.40, 9.32], edm: [112.10, 10.60], ezsign: [116.90, 11.15], admins: 2, displays: 1 },
+      { label: '21 - 50', min: 21, max: 50, included: 20, ezmax: [297.60, 9.02], edm: [218.10, 10.11], ezsign: [228.40, 10.55], admins: 3, displays: 1 },
+      { label: '51 - 100', min: 51, max: 100, included: 50, ezmax: [568.20, 4.21], edm: [521.40, 8.96], ezsign: [544.90, 9.99], admins: 4, displays: 1 },
+      { label: '101 - 250', min: 101, max: 250, included: 100, ezmax: [778.70, 2.77], edm: [969.40, 7.81], ezsign: [1044.40, 9.46], admins: 5, displays: 1 },
+      { label: '251 - 500', min: 251, max: 500, included: 250, ezmax: [1194.20, 1.92], edm: [2140.90, 6.72], ezsign: [2463.40, 8.90], admins: 6, displays: 1 },
+      { label: '501 - 1,250', min: 501, max: 1250, included: 500, ezmax: [1674.20, 1.75], edm: [3820.90, 5.57], ezsign: [4688.40, 7.76], admins: 7, displays: 1 },
+    ];
+
     window.ezmaxRefreshPanels = function ezmaxRefreshPanels() {
       activeEzmaxPanels.forEach(panel => {
         if (panel && typeof panel.calculate === 'function') panel.calculate();
@@ -2420,15 +2581,7 @@ const payload = {
       const SETUP_COST = 1500;
       const MAX_AGENTS = 1250;
 
-      const TIERS = [
-        { label: '1 - 10', min: 1, max: 10, included: 0, ezmax: [204.40, 0.00], edm: [112.10, 0.00], ezsign: [116.90, 0.00], admins: 1 },
-        { label: '11 - 20', min: 11, max: 20, included: 10, ezmax: [204.40, 9.32], edm: [112.10, 10.60], ezsign: [116.90, 11.15], admins: 2 },
-        { label: '21 - 50', min: 21, max: 50, included: 20, ezmax: [297.60, 9.02], edm: [218.10, 10.11], ezsign: [228.40, 10.55], admins: 3 },
-        { label: '51 - 100', min: 51, max: 100, included: 50, ezmax: [568.20, 4.21], edm: [521.40, 8.96], ezsign: [544.00, 9.99], admins: 4 },
-        { label: '101 - 250', min: 101, max: 250, included: 100, ezmax: [778.70, 2.77], edm: [969.40, 7.81], ezsign: [1044.40, 9.46], admins: 5 },
-        { label: '251 - 500', min: 251, max: 500, included: 250, ezmax: [1194.20, 1.92], edm: [2140.90, 6.72], ezsign: [2463.40, 8.90], admins: 6 },
-        { label: '501 - 1,250', min: 501, max: 1250, included: 500, ezmax: [1624.20, 1.75], edm: [3820.90, 5.57], ezsign: [2688.40, 7.76], admins: 7 },
-      ];
+      const TIERS = EZMAX_TIERS;
 
       const UI = {
         en: {
@@ -2472,11 +2625,13 @@ const payload = {
           includedHeader: 'Included',
           edmHeader: 'EDM',
           adminsHeader: 'eZsign admins',
+          displayHeader: 'e-Z-Display screens included',
           rparea: 'RPAREA',
           selectedServices: 'Selected monthly services:',
           noComponent: 'Select at least one component.',
           noComponentPreview: '- No component selected',
           generationNeedName: 'Enter the company name before generating the proposal.',
+          usersRequired: 'Enter the number of users for each selected module before generating the proposal.',
           generationWorking: 'Generating proposal...',
           generationDone: 'Proposal generated.',
           generationFailed: 'Generation failed',
@@ -2485,6 +2640,7 @@ const payload = {
           pricingIntro: summary => `Pricing calculations are based on these module user counts: ${summary}.`,
           serviceLine: (label, count, total) => `- Monthly ${label} fee (${count} agent${count === 1 ? '' : 's'}): ${total}`,
           totalLine: total => `Total monthly recurring fee: ${total}`,
+          discountLine: (count, rate, amount) => `- eZsign full-user discount (${count} users x ${rate}): -${amount}`,
           averageLine: average => `Average monthly recurring cost per agent: ${average}`,
           monthlyFeeTitle: label => `Monthly ${label} Fee`,
           subscriptionLine: (count, tier) => `Your subscription includes ${count} real estate agent${count === 1 ? '' : 's'}. You are in the ${tier} agents bracket.`,
@@ -2495,6 +2651,8 @@ const payload = {
           ezsignInfo: count => `This bracket includes ${count} eZsign admin account${count === 1 ? '' : 's'}.`,
           detailedCalc: 'Detailed monthly fee calculation:',
           avgPerAgent: value => `Average monthly cost per agent: ${value}.`,
+          discountTitle: 'eZsign full-user discount',
+          discountDetail: (count, rate, amount) => `Because all ${count} eZmax users also have the eZsign module, a ${rate} per-user monthly discount is applied. Discount calculation: ${count} x ${rate} = -${amount}.`,
           components: { ezmax: 'eZmax', edm: 'EDM', ezsign: 'eZsign' },
         },
         fr: {
@@ -2538,11 +2696,13 @@ const payload = {
           includedHeader: 'Inclus',
           edmHeader: 'GED',
           adminsHeader: 'Admins eZsign',
+          displayHeader: 'Écrans e-Z-Display inclus',
           rparea: 'TPASI',
           selectedServices: 'Services mensuels sélectionnés:',
           noComponent: 'Sélectionnez au moins une composante.',
           noComponentPreview: '- Aucune composante sélectionnée',
           generationNeedName: 'Entrez le nom de la compagnie avant de générer la proposition.',
+          usersRequired: 'Entrez le nombre d’utilisateurs pour chaque module sélectionné avant de générer la proposition.',
           generationWorking: 'Génération de la proposition...',
           generationDone: 'Proposition générée.',
           generationFailed: 'Échec de la génération',
@@ -2551,6 +2711,7 @@ const payload = {
           pricingIntro: summary => `Les calculs de tarification utilisent ces nombres d'utilisateurs par module : ${summary}.`,
           serviceLine: (label, count, total) => `- Frais mensuels ${label} (${count} agent${count === 1 ? '' : 's'}): ${total}`,
           totalLine: total => `Total mensuel récurrent: ${total}`,
+          discountLine: (count, rate, amount) => `- Rabais eZsign utilisateurs complets (${count} utilisateurs x ${rate}): -${amount}`,
           averageLine: average => `Coût mensuel récurrent moyen par agent: ${average}`,
           monthlyFeeTitle: label => `Frais mensuels ${label}`,
           subscriptionLine: (count, tier) => `Votre abonnement comprend ${count} agent${count === 1 ? '' : 's'} immobilier${count === 1 ? '' : 's'}. Vous êtes dans la tranche de ${tier} agents.`,
@@ -2561,6 +2722,8 @@ const payload = {
           ezsignInfo: count => `Cette tranche comprend ${count} compte${count === 1 ? '' : 's'} administrateur eZsign.`,
           detailedCalc: 'Calcul détaillé des frais mensuels:',
           avgPerAgent: value => `Coût mensuel moyen par agent: ${value}.`,
+          discountTitle: 'Rabais eZsign utilisateurs complets',
+          discountDetail: (count, rate, amount) => `Comme les ${count} utilisateurs eZmax ont aussi le module eZsign, un rabais mensuel de ${rate} par utilisateur est appliqué. Calcul du rabais: ${count} x ${rate} = -${amount}.`,
           components: { ezmax: 'eZmax', edm: 'GED', ezsign: 'eZsign' },
         },
       };
@@ -2657,6 +2820,7 @@ const payload = {
           setText(els.pricingTable.querySelector('.ezmax-th-edm-rparea'), t.edmHeader + ' ' + t.rparea);
           setText(els.pricingTable.querySelector('.ezmax-th-ezsign-rparea'), 'eZsign ' + t.rparea);
           setText(els.pricingTable.querySelector('.ezmax-th-admins'), t.adminsHeader);
+          setText(els.pricingTable.querySelector('.ezmax-th-display'), t.displayHeader);
         }
       }
 
@@ -2737,8 +2901,9 @@ const payload = {
 
       function moduleUsers(key) {
         const input = moduleInput(key);
+        const raw = input ? String(input.value || '').trim() : '';
         const bounded = clampAgents(input ? input.value : defaultAgents(), defaultAgents());
-        if (input && String(input.value) !== String(bounded)) input.value = bounded;
+        if (input && raw !== '' && String(input.value) !== String(bounded)) input.value = bounded;
         return bounded;
       }
 
@@ -2747,6 +2912,13 @@ const payload = {
           acc[key] = moduleUsers(key);
           return acc;
         }, {});
+      }
+
+      function selectedUsersMissing(selected) {
+        return isProposalBuilder && selected.some(key => {
+          const input = moduleInput(key);
+          return input && String(input.value || '').trim() === '';
+        });
       }
 
       function primaryAgentCount(componentUsers) {
@@ -2788,6 +2960,20 @@ const payload = {
           extraCost,
           total,
           average: roundMoney(total / agents),
+        };
+      }
+
+      function ezsignFullUserDiscount(selected, componentUsers, lang = getUiLang()) {
+        if (!selected.includes('ezmax') || !selected.includes('ezsign')) return null;
+        const ezmaxUsers = Math.max(0, Math.floor(Number(componentUsers.ezmax) || 0));
+        const ezsignUsers = Math.max(0, Math.floor(Number(componentUsers.ezsign) || 0));
+        if (ezmaxUsers < 1 || ezsignUsers < ezmaxUsers) return null;
+        const amount = roundMoney(ezmaxUsers * EZMAX_EZSIGN_FULL_USER_DISCOUNT);
+        return {
+          users: ezmaxUsers,
+          rate: EZMAX_EZSIGN_FULL_USER_DISCOUNT,
+          amount,
+          label: UI[lang].discountTitle,
         };
       }
 
@@ -2841,11 +3027,12 @@ const payload = {
             <td>${money(tier.ezmax[1], lang)}</td>
             <td>${money(tier.edm[0], lang)}</td>
             <td>${money(tier.edm[1], lang)}</td>
-            <td>${money(tier.ezsign[0], lang)}</td>
-            <td>${money(tier.ezsign[1], lang)}</td>
-            <td>${tier.admins}</td>
-          </tr>
-        `).join('');
+          <td>${money(tier.ezsign[0], lang)}</td>
+          <td>${money(tier.ezsign[1], lang)}</td>
+          <td>${tier.admins}</td>
+          <td>${tier.displays}</td>
+        </tr>
+      `).join('');
       }
 
       function calculate() {
@@ -2861,9 +3048,12 @@ const payload = {
         const tier = findTier(primaryAgents);
         const items = selected.map(key => componentBreakdown(key, componentUsers[key], uiLang));
         const previewItems = selected.map(key => componentBreakdown(key, componentUsers[key], offerLang));
+        const discount = ezsignFullUserDiscount(selected, componentUsers, uiLang);
+        const offerDiscount = ezsignFullUserDiscount(selected, componentUsers, offerLang);
         const activeTierLabels = new Set(items.map(item => item.tier.label));
         const setupCost = setupCostValue();
-        const monthlyTotal = roundMoney(items.reduce((sum, item) => sum + item.total, 0));
+        const grossMonthlyTotal = roundMoney(items.reduce((sum, item) => sum + item.total, 0));
+        const monthlyTotal = roundMoney(Math.max(0, grossMonthlyTotal - (discount?.amount || 0)));
         const average = selected.length ? roundMoney(monthlyTotal / primaryAgents) : 0;
 
         if (els.setupCost) els.setupCost.textContent = money(setupCost, uiLang);
@@ -2881,7 +3071,15 @@ const payload = {
                   </div>
                   <strong>${money(item.total, uiLang)}</strong>
                 </div>
-              `).join('')
+              `).join('') + (discount ? `
+                <div class="lineItem">
+                  <div>
+                    <strong>${discount.label}</strong>
+                    <span>${discount.users} × ${money(discount.rate, uiLang)}</span>
+                  </div>
+                  <strong>-${money(discount.amount, uiLang)}</strong>
+                </div>
+              ` : '')
             : `<div class="lineItem"><span>${t.noComponent}</span><strong>-</strong></div>`;
         }
 
@@ -2891,6 +3089,9 @@ const payload = {
         preview.push(offerT.selectedServices);
         if (previewItems.length) {
           previewItems.forEach(item => preview.push(offerT.serviceLine(item.label, item.agents, money(item.total, offerLang))));
+          if (offerDiscount) {
+            preview.push(offerT.discountLine(offerDiscount.users, money(offerDiscount.rate, offerLang), money(offerDiscount.amount, offerLang)));
+          }
           preview.push(offerT.totalLine(money(monthlyTotal, offerLang)));
           preview.push(offerT.averageLine(money(average, offerLang)));
         } else {
@@ -2898,13 +3099,17 @@ const payload = {
         }
         preview.push("");
         preview.push(previewItems.map(item => detailBlock(item, offerLang)).join('\n\n'));
+        if (offerDiscount) {
+          preview.push('\n\n' + offerT.discountTitle);
+          preview.push(offerT.discountDetail(offerDiscount.users, money(offerDiscount.rate, offerLang), money(offerDiscount.amount, offerLang)));
+        }
         if (els.calculationPreview) els.calculationPreview.textContent = preview.join('\n');
 
         renderPricingTable(activeTierLabels);
         
         if (els.generateBtn) {
           const formats = outputFormats();
-          els.generateBtn.disabled = items.length === 0 || (!formats.word && !formats.pdf) || isGenerating;
+          els.generateBtn.disabled = items.length === 0 || selectedUsersMissing(selected) || (!formats.word && !formats.pdf) || isGenerating;
           refreshGenerateButtonLabel();
         }
       }
@@ -2965,6 +3170,12 @@ const payload = {
         const selected = selectedComponents();
         if (!selected.length) {
           setStatus(t.noComponent, 'error');
+          return;
+        }
+        if (selectedUsersMissing(selected)) {
+          setStatus(t.usersRequired, 'error');
+          const firstMissing = selected.map(moduleInput).find(input => input && String(input.value || '').trim() === '');
+          if (firstMissing) firstMissing.focus();
           return;
         }
 
@@ -3072,10 +3283,11 @@ const payload = {
 
       function resetForm() {
         if (els.companyName) els.companyName.value = '';
-        if (els.agents) els.agents.value = 18;
-        if (els.usersEzmax) els.usersEzmax.value = 18;
-        if (els.usersEdm) els.usersEdm.value = 18;
-        if (els.usersEzsign) els.usersEzsign.value = 18;
+        const defaultUserValue = isProposalBuilder ? '' : 18;
+        if (els.agents) els.agents.value = defaultUserValue;
+        if (els.usersEzmax) els.usersEzmax.value = defaultUserValue;
+        if (els.usersEdm) els.usersEdm.value = defaultUserValue;
+        if (els.usersEzsign) els.usersEzsign.value = defaultUserValue;
         if (els.setupInput) els.setupInput.value = String(SETUP_COST);
         if (els.includeEzmax) els.includeEzmax.checked = true;
         if (els.includeEdm) els.includeEdm.checked = true;

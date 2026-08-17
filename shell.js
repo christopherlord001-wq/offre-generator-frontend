@@ -225,10 +225,10 @@
     $('sidebarToggle')?.addEventListener('click', () => document.body.classList.toggle('sidebar-collapsed'));
     $('platformLogo')?.addEventListener('click', toggleBrand);
     $('topSettingsBtn')?.addEventListener('click', () => showView('admin'));
-    $('topInfoBtn')?.addEventListener('click', () => $('infoBtn')?.click());
-    $('calculatorInfoBtn')?.addEventListener('click', () => $('infoBtn')?.click());
-    $('topCompareBtn')?.addEventListener('click', () => $('compareBtn')?.click());
-    $('calculatorCompareBtn')?.addEventListener('click', () => $('compareBtn')?.click());
+    $('topInfoBtn')?.addEventListener('click', openBrandPricing);
+    $('calculatorInfoBtn')?.addEventListener('click', openBrandPricing);
+    $('topCompareBtn')?.addEventListener('click', openBrandCompare);
+    $('calculatorCompareBtn')?.addEventListener('click', openBrandCompare);
     $('topSupportBtn')?.addEventListener('click', openSupportModal);
     $('refreshTicketsBtn')?.addEventListener('click', refreshTickets);
     $('refreshAlertsBtn')?.addEventListener('click', refreshSecurityAlerts);
@@ -1099,10 +1099,30 @@
     `;
   }
 
+  function activeBrand() {
+    return window.ezAuth?.user?.activeBrand || 'ezsign';
+  }
+
+  function openBrandPricing() {
+    if (activeBrand() === 'ezmax' && typeof window.ezmaxOpenPricingModal === 'function') {
+      window.ezmaxOpenPricingModal();
+      return;
+    }
+    $('infoBtn')?.click();
+  }
+
+  function openBrandCompare() {
+    if (activeBrand() === 'ezmax' && typeof window.ezmaxOpenCompareModal === 'function') {
+      window.ezmaxOpenCompareModal();
+      return;
+    }
+    $('compareBtn')?.click();
+  }
+
   function setLogo() {
     const logo = $('platformLogo');
     if (!logo) return;
-    const active = window.ezAuth?.user?.activeBrand || 'ezsign';
+    const active = activeBrand();
     logo.src = `${API_BASE}/logo-${active}-topbar.png`;
     logo.alt = active === 'ezmax' ? 'eZmax' : 'eZsign';
     

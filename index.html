@@ -4,14 +4,14 @@
 
 <!DOCTYPE html>
 
-<html lang="fr" data-theme="light">
+<html lang="fr" data-theme="light" class="auth-pending">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Calculateur eZsign</title>
 
   <!-- Link to the stylesheet (same folder) -->
-  <link rel="stylesheet" href="style.css?v=3.8" />
+  <link rel="stylesheet" href="style.css?v=3.9" />
 </head>
 <body>
   <div class="appbar legacy-appbar" aria-hidden="true">
@@ -423,6 +423,7 @@
                         <th>eZsign</th>
                         <th class="ezmax-th-ezsign-rparea">eZsign TPASI</th>
                         <th class="ezmax-th-admins">Admins eZsign</th>
+                        <th class="ezmax-th-display">Écrans e-Z-Display</th>
                       </tr>
                     </thead>
                     <tbody></tbody>
@@ -731,7 +732,7 @@
               </label>
               <label class="ezmax-module-users">
                 <span class="ezmax-users-label-ezmax">Utilisateurs eZmax</span>
-                <input class="ezmax-users-ezmax" type="number" min="1" max="1250" value="18" inputmode="numeric" />
+                <input class="ezmax-users-ezmax" type="number" min="1" max="1250" value="" inputmode="numeric" />
               </label>
               <label class="module-option" style="display:flex; align-items:center; gap:10px; padding:10px; border:1px solid var(--brand-border); border-radius:4px; cursor:pointer;">
                 <input class="ezmax-include-edm" type="checkbox" checked />
@@ -742,7 +743,7 @@
               </label>
               <label class="ezmax-module-users">
                 <span class="ezmax-users-label-edm">Utilisateurs GED</span>
-                <input class="ezmax-users-edm" type="number" min="1" max="1250" value="18" inputmode="numeric" />
+                <input class="ezmax-users-edm" type="number" min="1" max="1250" value="" inputmode="numeric" />
               </label>
               <label class="module-option" style="display:flex; align-items:center; gap:10px; padding:10px; border:1px solid var(--brand-border); border-radius:4px; cursor:pointer;">
                 <input class="ezmax-include-ezsign" type="checkbox" />
@@ -753,7 +754,7 @@
               </label>
               <label class="ezmax-module-users">
                 <span class="ezmax-users-label-ezsign">Utilisateurs eZsign</span>
-                <input class="ezmax-users-ezsign" type="number" min="1" max="1250" value="18" inputmode="numeric" />
+                <input class="ezmax-users-ezsign" type="number" min="1" max="1250" value="" inputmode="numeric" />
               </label>
             </div>
             
@@ -824,6 +825,7 @@
                     <th>eZsign</th>
                     <th class="ezmax-th-ezsign-rparea">TPASI</th>
                     <th class="ezmax-th-admins">Admins</th>
+                    <th class="ezmax-th-display">Écrans e-Z-Display</th>
                   </tr>
                 </thead>
                 <tbody></tbody>
@@ -933,13 +935,13 @@
     </div>
   </div>
 
-  <script src="./config.js?v=1.3"></script>
-  <script src="./auth.js?v=1.7"></script>
-  <script src="./app.js?v=3.4"></script>
+  <script src="./config.js?v=1.4"></script>
+  <script src="./auth.js?v=1.8"></script>
+  <script src="./app.js?v=3.5"></script>
   <script src="./meeting-ai.js?v=1.8"></script>
   <script src="./chat.js?v=1.2"></script>
   <script src="./tasks.js?v=1.0"></script>
-  <script src="./shell.js?v=1.6"></script>
+  <script src="./shell.js?v=1.7"></script>
 </body>
 </html>
 

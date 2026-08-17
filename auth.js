@@ -52,10 +52,15 @@
     }
     const data = await res.json();
     auth.user = data.user;
+    if (!auth.user) {
+      window.location.href = LOGIN_URL;
+      throw new Error('Connexion requise.');
+    }
     if (auth.user) {
       auth.user.activeBrand = data.activeBrand || data.user.activeBrand || 'ezsign';
     }
     auth.csrfToken = data.csrfToken;
+    document.documentElement.classList.remove('auth-pending');
     renderUserBadge();
     return data;
   }

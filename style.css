@@ -19,6 +19,9 @@ html[data-theme="dark"]{
 *{box-sizing:border-box}
 html,body{height:100%;background:var(--brand-bg);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
 body{margin:0;min-height:100vh}
+html.auth-pending body{background:#edf7fb}
+html.auth-pending .platform-shell,
+html.auth-pending .legacy-appbar{opacity:0;visibility:hidden}
 
 /* ==========================================================================
    PLATFORM SHELL
@@ -1831,6 +1834,10 @@ html[data-theme="dark"] .platform-topbar .platform-pill:hover {
   width: 100%;
   border-collapse: collapse;
   font-size: 12.5px;
+}
+
+.ezmax-modal-price-table {
+  min-width: 980px;
 }
 
 .ezmax-pricing-table th,
