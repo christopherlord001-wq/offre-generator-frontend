@@ -2024,6 +2024,70 @@ function setOfferLang(lang){
       URL.revokeObjectURL(url);
     }
 
+    function cleanFilenamePart(value, fallback = 'Nomdelacompagnie') {
+      const cleaned = String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[<>:"/\\|?*\x00-\x1F]+/g, '')
+        .replace(/['’`]+/g, '')
+        .replace(/\s+/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_+|_+$/g, '');
+      return cleaned || fallback;
+    }
+
+    function downloadExtension(outputFormats, mimeType = '') {
+      const mime = String(mimeType || '').toLowerCase();
+      if (mime.includes('pdf')) return 'pdf';
+      if (mime.includes('zip')) return 'zip';
+      if (mime.includes('wordprocessingml') || mime.includes('msword')) return 'docx';
+
+      const wantsWord = Boolean(outputFormats?.word);
+      const wantsPdf = Boolean(outputFormats?.pdf);
+      if (wantsWord && wantsPdf) return 'zip';
+      if (wantsPdf) return 'pdf';
+      return 'docx';
+    }
+
+    function filenameFromContentDisposition(headerValue) {
+      const header = String(headerValue || '');
+      if (!header) return '';
+
+      const filenameStar = header.match(/filename\*=([^;]+)/i);
+      if (filenameStar) {
+        let value = filenameStar[1].trim().replace(/^UTF-8''/i, '');
+        value = value.replace(/^"|"$/g, '');
+        try {
+          value = decodeURIComponent(value);
+        } catch (_) {}
+        if (value) return value;
+      }
+
+      const filename = header.match(/filename=(?:"([^"]+)"|([^;]+))/i);
+      if (filename) return (filename[1] || filename[2] || '').trim();
+      return '';
+    }
+
+    function ensureDownloadExtension(filename, outputFormats, mimeType = '') {
+      const extension = downloadExtension(outputFormats, mimeType);
+      const cleaned = String(filename || '').trim().replace(/[<>:"/\\|?*\x00-\x1F]+/g, '');
+      const withoutKnownExtension = cleaned.replace(/\.(docx|pdf|zip)$/i, '');
+      return `${withoutKnownExtension || 'Offer'}.${extension}`;
+    }
+
+    function ezsignOfferDownloadFilename(companyName, outputFormats, offerLang = OFFER_LANG, mimeType = '') {
+      const company = cleanFilenamePart(companyName);
+      const base = offerLang === 'en'
+        ? `eZsign_Proposal_-_${company}`
+        : `Offre_de_service_eZsign_-_${company}`;
+      return ensureDownloadExtension(base, outputFormats, mimeType);
+    }
+
+    function ezmaxOfferDownloadFilename(companyName, outputFormats, mimeType = '') {
+      const company = cleanFilenamePart(companyName, 'compagnie');
+      return ensureDownloadExtension(`offre_eZmax_${company}`, outputFormats, mimeType);
+    }
+
     function cubicPoint(t, p0, p1, p2, p3) {
       const u = 1 - t;
       return {
@@ -2480,7 +2544,7 @@ const payload = {
         const downloadFlight = startDownloadFlight(offerGenerateBtn, outputFormats);
         let downloadReady = false;
         let downloadBlob = null;
-        let downloadFilename = 'Offer.docx';
+        let downloadFilename = ezsignOfferDownloadFilename(companyName, outputFormats, OFFER_LANG);
 
         try {
           if (window.ezAuth?.ready) await window.ezAuth.ready;
@@ -2506,14 +2570,14 @@ const payload = {
               return;
             }
             
-            // ✅ Le serveur renvoie maintenant un fichier (docx/pdf), pas du JSON
             downloadBlob = await res.blob();
             
-            // Nom de fichier depuis le header (si présent)
-            const dispo = res.headers.get('content-disposition');
-            if (dispo && dispo.includes('filename=')) {
-              downloadFilename = dispo.split('filename=')[1].replace(/"/g, '').trim();
-            }
+            const headerFilename = filenameFromContentDisposition(res.headers.get('content-disposition'));
+            downloadFilename = ensureDownloadExtension(
+              headerFilename || downloadFilename,
+              outputFormats,
+              downloadBlob.type
+            );
             
             downloadReady = true;
                       
@@ -2723,7 +2787,7 @@ const payload = {
           detailedCalc: 'Calcul détaillé des frais mensuels:',
           avgPerAgent: value => `Coût mensuel moyen par agent: ${value}.`,
           discountTitle: 'Rabais eZsign utilisateurs complets',
-          discountDetail: (count, rate, amount) => `Comme les ${count} utilisateurs eZmax ont aussi le module eZsign, un rabais mensuel de ${rate} par utilisateur est appliqué. Calcul du rabais: ${count} x ${rate} = -${amount}.`,
+          discountDetail: (count, rate, amount) => `Comme les ${count} utilisateurs eZmax ont aussi le module eZsign, un rabais mensuel de ${rate} par utilisateur est appliqué. Calcul du rabais mensuel: ${count} x ${rate} = -${amount}.`,
           components: { ezmax: 'eZmax', edm: 'GED', ezsign: 'eZsign' },
         },
       };
@@ -3100,7 +3164,6 @@ const payload = {
         preview.push("");
         preview.push(previewItems.map(item => detailBlock(item, offerLang)).join('\n\n'));
         if (offerDiscount) {
-          preview.push('\n\n' + offerT.discountTitle);
           preview.push(offerT.discountDetail(offerDiscount.users, money(offerDiscount.rate, offerLang), money(offerDiscount.amount, offerLang)));
         }
         if (els.calculationPreview) els.calculationPreview.textContent = preview.join('\n');
@@ -3222,7 +3285,7 @@ const payload = {
         
         let downloadReady = false;
         let downloadBlob = null;
-        let downloadFilename = 'eZmax Proposal Word PDF.zip';
+        let downloadFilename = ezmaxOfferDownloadFilename(companyName, formats);
 
         try {
           const res = await window.ezAuth.fetch('/generate', {
@@ -3238,14 +3301,12 @@ const payload = {
 
           downloadBlob = await res.blob();
           
-          const dispo = res.headers.get('content-disposition');
-          if (dispo && dispo.includes('filename=')) {
-            downloadFilename = dispo.split('filename=')[1].replace(/"/g, '').trim();
-          } else {
-            const formatSuffix = (formats.word && formats.pdf) ? 'zip' : (formats.word ? 'docx' : 'pdf');
-            const cleanName = companyName.toLowerCase().replace(/[^a-z0-9]+/g, '_');
-            downloadFilename = 'offre_eZmax_' + cleanName + '.' + formatSuffix;
-          }
+          const headerFilename = filenameFromContentDisposition(res.headers.get('content-disposition'));
+          downloadFilename = ensureDownloadExtension(
+            headerFilename || downloadFilename,
+            formats,
+            downloadBlob.type
+          );
           
           downloadReady = true;
           setStatus(t.generationDone, 'ok');
