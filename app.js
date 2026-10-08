@@ -1144,9 +1144,15 @@
       return d;
     }
 
+    function getOfferValidUntil(date) {
+      const threeMonthsLater = addMonthsSafe(date, 3);
+      const yearEnd = new Date(date.getFullYear(), 11, 31);
+      return threeMonthsLater > yearEnd ? yearEnd : threeMonthsLater;
+    }
+
     function refreshOfferDatesNoteOnly(){
   const today = new Date();
-  const validUntil = addMonthsSafe(today, 3);
+  const validUntil = getOfferValidUntil(today);
 
   if (!offerDatesNote) return;
 
@@ -2513,7 +2519,7 @@ function setOfferLang(lang){
         }
 
         const today = new Date();
-        const validUntil = addMonthsSafe(today, 3);
+        const validUntil = getOfferValidUntil(today);
 
         const simulationBlocks = simulations.map((sim, index) =>
           buildOfferSimulationBlock(sim.planKey, sim.files, sim.users, index + 1, simulations.length)
@@ -3212,6 +3218,12 @@ const payload = {
         return d;
       }
 
+      function getOfferValidUntil(date) {
+        const threeMonthsLater = addMonthsSafe(date, 3);
+        const yearEnd = new Date(date.getFullYear(), 11, 31);
+        return threeMonthsLater > yearEnd ? yearEnd : threeMonthsLater;
+      }
+
       function formatDate(date, lang = getOfferLang()) {
         return date.toLocaleDateString(lang === 'fr' ? 'fr-CA' : 'en-CA', {
           year: 'numeric',
@@ -3252,7 +3264,7 @@ const payload = {
         const componentUsers = selectedComponentUsers(selected);
         const agents = primaryAgentCount(componentUsers);
         const today = new Date();
-        const validUntil = addMonthsSafe(today, 3);
+        const validUntil = getOfferValidUntil(today);
 
         const payload = {
           companyName,
